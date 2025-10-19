@@ -48,8 +48,8 @@ class _CadastroTelaState extends State<CadastroTela> {
     if (value == null || value.isEmpty) {
       return 'Telefone é obrigatório';
     }
-    if (!RegExp(r'^\(\d{3}\)\s\d{9}$').hasMatch(value)) {
-      return 'Digite no formato (047) 912345678';
+    if (!RegExp(r'^\(\d{2,3}\)\s\d{8,9}$').hasMatch(value)) {
+      return 'Digite no formato (47) 912345678';
     }
     return null;
   }
@@ -80,12 +80,14 @@ class _CadastroTelaState extends State<CadastroTela> {
   void _formatarTelefone(String value) {
     String digitsOnly = value.replaceAll(RegExp(r'\D'), '');
     
-    if (digitsOnly.length <= 3) {
+    if (digitsOnly.length <= 2) {
       _telefoneController.text = digitsOnly;
-    } else if (digitsOnly.length <= 6) {
-      _telefoneController.text = '(${digitsOnly.substring(0, 3)}) ${digitsOnly.substring(3)}';
+    } else if (digitsOnly.length <= 5) {
+      _telefoneController.text = '(${digitsOnly.substring(0, 2)}) ${digitsOnly.substring(2)}';
+    } else if (digitsOnly.length <= 10) {
+      _telefoneController.text = '(${digitsOnly.substring(0, 2)}) ${digitsOnly.substring(2)}';
     } else if (digitsOnly.length <= 11) {
-      _telefoneController.text = '(${digitsOnly.substring(0, 3)}) ${digitsOnly.substring(3, 7)}${digitsOnly.substring(7)}';
+      _telefoneController.text = '(${digitsOnly.substring(0, 3)}) ${digitsOnly.substring(3)}';
     }
     
     _telefoneController.selection = TextSelection.fromPosition(
@@ -284,7 +286,7 @@ class _CadastroTelaState extends State<CadastroTela> {
                   onChanged: _formatarTelefone,
                   decoration: const InputDecoration(
                     labelText: 'Telefone',
-                    hintText: '(047) 912345678',
+                    hintText: '(47) 912345678',
                     border: OutlineInputBorder(),
                     prefixIcon: Icon(Icons.phone),
                   ),
