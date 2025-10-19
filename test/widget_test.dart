@@ -1,30 +1,22 @@
-// This is a basic Flutter widget test.
+// Teste básico para o app PEX
 //
-// To perform an interaction with a widget in your test, use the WidgetTester
-// utility in the flutter_test package. For example, you can send tap and scroll
-// gestures. You can also use WidgetTester to find child widgets in the widget
-// tree, read text, and verify that the values of widget properties are correct.
+// Este é um teste simples para verificar se o app inicia corretamente
+// e se a tela inicial é exibida.
 
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:pex/main.dart';
 
 void main() {
-  testWidgets('Counter increments smoke test', (WidgetTester tester) async {
-    // Build our app and trigger a frame.
-    await tester.pumpWidget(const MyApp());
+  testWidgets('App inicia e mostra tela Área do Cliente', (WidgetTester tester) async {
+    // Constrói o app e dispara um frame.
+    await tester.pumpWidget(const PexApp());
 
-    // Verify that our counter starts at 0.
-    expect(find.text('0'), findsOneWidget);
-    expect(find.text('1'), findsNothing);
-
-    // Tap the '+' icon and trigger a frame.
-    await tester.tap(find.byIcon(Icons.add));
-    await tester.pump();
-
-    // Verify that our counter has incremented.
-    expect(find.text('0'), findsNothing);
-    expect(find.text('1'), findsOneWidget);
+    // Verifica se o título "Área do Cliente" está presente.
+    expect(find.text('Área do Cliente'), findsOneWidget);
+    
+    // Verifica se os botões estão presentes.
+    expect(find.text('Não sou cliente'), findsOneWidget);
+    expect(find.text('Já sou cliente'), findsOneWidget);
   });
 }
