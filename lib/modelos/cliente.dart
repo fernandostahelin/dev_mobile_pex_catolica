@@ -13,12 +13,7 @@ class Cliente {
 
   // Método para converter Cliente para Map (útil para armazenamento)
   Map<String, dynamic> toMap() {
-    return {
-      'nome': nome,
-      'email': email,
-      'telefone': telefone,
-      'senha': senha,
-    };
+    return {'nome': nome, 'email': email, 'telefone': telefone, 'senha': senha};
   }
 
   // Método para criar Cliente a partir de Map

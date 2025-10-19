@@ -10,16 +10,11 @@ class AreaClienteLogadoTela extends StatelessWidget {
         title: const Text('Área do Cliente'),
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
       ),
-      body: const Center(
-        child: Text(''),
-      ),
+      body: const Center(child: Text('')),
       bottomNavigationBar: BottomNavigationBar(
         type: BottomNavigationBarType.fixed,
         items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home),
-            label: 'Início',
-          ),
+          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Início'),
           BottomNavigationBarItem(
             icon: Icon(Icons.person),
             label: 'Área do Cliente',

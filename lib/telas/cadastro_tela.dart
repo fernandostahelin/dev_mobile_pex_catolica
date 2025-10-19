@@ -17,7 +17,7 @@ class _CadastroTelaState extends State<CadastroTela> {
   final _telefoneController = TextEditingController();
   final _senhaController = TextEditingController();
   final _confirmarSenhaController = TextEditingController();
-  
+
   bool _senhaVisivel = false;
   bool _confirmarSenhaVisivel = false;
   bool _isLoading = false;
@@ -79,17 +79,20 @@ class _CadastroTelaState extends State<CadastroTela> {
   // Formatação do telefone
   void _formatarTelefone(String value) {
     String digitsOnly = value.replaceAll(RegExp(r'\D'), '');
-    
+
     if (digitsOnly.length <= 2) {
       _telefoneController.text = digitsOnly;
     } else if (digitsOnly.length <= 5) {
-      _telefoneController.text = '(${digitsOnly.substring(0, 2)}) ${digitsOnly.substring(2)}';
+      _telefoneController.text =
+          '(${digitsOnly.substring(0, 2)}) ${digitsOnly.substring(2)}';
     } else if (digitsOnly.length <= 10) {
-      _telefoneController.text = '(${digitsOnly.substring(0, 2)}) ${digitsOnly.substring(2)}';
+      _telefoneController.text =
+          '(${digitsOnly.substring(0, 2)}) ${digitsOnly.substring(2)}';
     } else if (digitsOnly.length <= 11) {
-      _telefoneController.text = '(${digitsOnly.substring(0, 3)}) ${digitsOnly.substring(3)}';
+      _telefoneController.text =
+          '(${digitsOnly.substring(0, 3)}) ${digitsOnly.substring(3)}';
     }
-    
+
     _telefoneController.selection = TextSelection.fromPosition(
       TextPosition(offset: _telefoneController.text.length),
     );
@@ -157,9 +160,9 @@ class _CadastroTelaState extends State<CadastroTela> {
               onPressed: () {
                 Navigator.of(context).pop(); // Fecha o diálogo
                 Navigator.pushNamedAndRemoveUntil(
-                  context, 
-                  '/inicio', 
-                  (route) => false
+                  context,
+                  '/inicio',
+                  (route) => false,
                 ); // Navega para início
               },
               child: const Text('OK'),
@@ -224,9 +227,9 @@ class _CadastroTelaState extends State<CadastroTela> {
                     ),
                   ),
                 ),
-                
+
                 const SizedBox(height: 30),
-                
+
                 // Título
                 const Center(
                   child: Text(
@@ -238,9 +241,9 @@ class _CadastroTelaState extends State<CadastroTela> {
                     ),
                   ),
                 ),
-                
+
                 const SizedBox(height: 30),
-                
+
                 // Campo Nome
                 TextFormField(
                   controller: _nomeController,
@@ -257,9 +260,9 @@ class _CadastroTelaState extends State<CadastroTela> {
                     return null;
                   },
                 ),
-                
+
                 const SizedBox(height: 16),
-                
+
                 // Campo Email
                 TextFormField(
                   controller: _emailController,
@@ -272,9 +275,9 @@ class _CadastroTelaState extends State<CadastroTela> {
                   ),
                   validator: _validarEmail,
                 ),
-                
+
                 const SizedBox(height: 16),
-                
+
                 // Campo Telefone
                 TextFormField(
                   controller: _telefoneController,
@@ -292,9 +295,9 @@ class _CadastroTelaState extends State<CadastroTela> {
                   ),
                   validator: _validarTelefone,
                 ),
-                
+
                 const SizedBox(height: 16),
-                
+
                 // Campo Senha
                 TextFormField(
                   controller: _senhaController,
@@ -317,9 +320,9 @@ class _CadastroTelaState extends State<CadastroTela> {
                   ),
                   validator: _validarSenha,
                 ),
-                
+
                 const SizedBox(height: 16),
-                
+
                 // Campo Confirme a Senha
                 TextFormField(
                   controller: _confirmarSenhaController,
@@ -331,7 +334,9 @@ class _CadastroTelaState extends State<CadastroTela> {
                     prefixIcon: const Icon(Icons.lock),
                     suffixIcon: IconButton(
                       icon: Icon(
-                        _confirmarSenhaVisivel ? Icons.visibility : Icons.visibility_off,
+                        _confirmarSenhaVisivel
+                            ? Icons.visibility
+                            : Icons.visibility_off,
                       ),
                       onPressed: () {
                         setState(() {
@@ -342,9 +347,9 @@ class _CadastroTelaState extends State<CadastroTela> {
                   ),
                   validator: _validarConfirmarSenha,
                 ),
-                
+
                 const SizedBox(height: 30),
-                
+
                 // Botão Cadastrar
                 SizedBox(
                   width: double.infinity,
@@ -364,7 +369,9 @@ class _CadastroTelaState extends State<CadastroTela> {
                             width: 20,
                             child: CircularProgressIndicator(
                               strokeWidth: 2,
-                              valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                              valueColor: AlwaysStoppedAnimation<Color>(
+                                Colors.white,
+                              ),
                             ),
                           )
                         : const Text(
@@ -384,10 +391,7 @@ class _CadastroTelaState extends State<CadastroTela> {
       bottomNavigationBar: BottomNavigationBar(
         type: BottomNavigationBarType.fixed,
         items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home),
-            label: 'Início',
-          ),
+          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Início'),
           BottomNavigationBarItem(
             icon: Icon(Icons.person),
             label: 'Área do Cliente',

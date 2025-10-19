@@ -12,7 +12,7 @@ class _LoginTelaState extends State<LoginTela> {
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   final _senhaController = TextEditingController();
-  
+
   bool _senhaVisivel = false;
   bool _isLoading = false;
 
@@ -100,9 +100,9 @@ class _LoginTelaState extends State<LoginTela> {
               onPressed: () {
                 Navigator.of(context).pop(); // Fecha o diálogo
                 Navigator.pushNamedAndRemoveUntil(
-                  context, 
-                  '/inicio', 
-                  (route) => false
+                  context,
+                  '/inicio',
+                  (route) => false,
                 ); // Navega para início
               },
               child: const Text('OK'),
@@ -167,9 +167,9 @@ class _LoginTelaState extends State<LoginTela> {
                     ),
                   ),
                 ),
-                
+
                 const SizedBox(height: 30),
-                
+
                 // Título
                 const Center(
                   child: Text(
@@ -181,9 +181,9 @@ class _LoginTelaState extends State<LoginTela> {
                     ),
                   ),
                 ),
-                
+
                 const SizedBox(height: 30),
-                
+
                 // Campo Email
                 TextFormField(
                   controller: _emailController,
@@ -196,9 +196,9 @@ class _LoginTelaState extends State<LoginTela> {
                   ),
                   validator: _validarEmail,
                 ),
-                
+
                 const SizedBox(height: 16),
-                
+
                 // Campo Senha
                 TextFormField(
                   controller: _senhaController,
@@ -221,9 +221,9 @@ class _LoginTelaState extends State<LoginTela> {
                   ),
                   validator: _validarSenha,
                 ),
-                
+
                 const SizedBox(height: 30),
-                
+
                 // Botão Login
                 SizedBox(
                   width: double.infinity,
@@ -243,7 +243,9 @@ class _LoginTelaState extends State<LoginTela> {
                             width: 20,
                             child: CircularProgressIndicator(
                               strokeWidth: 2,
-                              valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                              valueColor: AlwaysStoppedAnimation<Color>(
+                                Colors.white,
+                              ),
                             ),
                           )
                         : const Text(
@@ -263,10 +265,7 @@ class _LoginTelaState extends State<LoginTela> {
       bottomNavigationBar: BottomNavigationBar(
         type: BottomNavigationBarType.fixed,
         items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home),
-            label: 'Início',
-          ),
+          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Início'),
           BottomNavigationBarItem(
             icon: Icon(Icons.person),
             label: 'Área do Cliente',

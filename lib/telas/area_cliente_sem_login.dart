@@ -13,7 +13,7 @@ class AreaClienteSemLogin extends StatelessWidget {
             children: [
               // Espaçamento superior
               const SizedBox(height: 40),
-              
+
               // Placeholder da imagem/logo
               Container(
                 width: double.infinity,
@@ -28,9 +28,9 @@ class AreaClienteSemLogin extends StatelessWidget {
                   color: Colors.grey,
                 ),
               ),
-              
+
               const SizedBox(height: 40),
-              
+
               // Título
               const Text(
                 'Área do Cliente',
@@ -40,9 +40,9 @@ class AreaClienteSemLogin extends StatelessWidget {
                   color: Colors.black87,
                 ),
               ),
-              
+
               const SizedBox(height: 60),
-              
+
               // Botão "Não sou cliente"
               SizedBox(
                 width: double.infinity,
@@ -59,16 +59,13 @@ class AreaClienteSemLogin extends StatelessWidget {
                   ),
                   child: const Text(
                     'Não sou cliente',
-                    style: TextStyle(
-                      fontSize: 16,
-                      color: Colors.black87,
-                    ),
+                    style: TextStyle(fontSize: 16, color: Colors.black87),
                   ),
                 ),
               ),
-              
+
               const SizedBox(height: 20),
-              
+
               // Botão "Já sou cliente"
               SizedBox(
                 width: double.infinity,
@@ -94,7 +91,7 @@ class AreaClienteSemLogin extends StatelessWidget {
                   ),
                 ),
               ),
-              
+
               // Espaçamento para empurrar a navegação inferior
               const Spacer(),
             ],
@@ -105,10 +102,7 @@ class AreaClienteSemLogin extends StatelessWidget {
         type: BottomNavigationBarType.fixed,
         currentIndex: 1, // Destaca a aba "Área do Cliente"
         items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home),
-            label: 'Início',
-          ),
+          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Início'),
           BottomNavigationBarItem(
             icon: Icon(Icons.person),
             label: 'Área do Cliente',
