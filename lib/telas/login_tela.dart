@@ -52,11 +52,8 @@ class _LoginTelaState extends State<LoginTela> {
       _isLoading = true;
     });
 
-    // Simula um delay de rede
-    await Future.delayed(const Duration(seconds: 1));
-
     try {
-      var cliente = AuthService.autenticarCliente(
+      var cliente = await AuthService.autenticarCliente(
         _emailController.text.trim(),
         _senhaController.text,
       );
@@ -66,8 +63,14 @@ class _LoginTelaState extends State<LoginTela> {
       });
 
       if (cliente != null) {
-        // Login bem-sucedido
-        _mostrarDialogoSucesso(cliente.nome);
+        // Login bem-sucedido - navega para área logada
+        if (mounted) {
+          Navigator.pushNamedAndRemoveUntil(
+            context,
+            '/area-cliente-logado',
+            (route) => false,
+          );
+        }
       } else {
         // Credenciais inválidas
         _mostrarDialogoErro('Email ou senha incorretos');
@@ -78,39 +81,6 @@ class _LoginTelaState extends State<LoginTela> {
       });
       _mostrarDialogoErro('Erro ao fazer login. Tente novamente.');
     }
-  }
-
-  // Diálogo de sucesso
-  void _mostrarDialogoSucesso(String nomeCliente) {
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Row(
-            children: [
-              Icon(Icons.check_circle, color: Colors.green),
-              SizedBox(width: 10),
-              Text('Login realizado!'),
-            ],
-          ),
-          content: Text('Bem-vindo, $nomeCliente!'),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop(); // Fecha o diálogo
-                Navigator.pushNamedAndRemoveUntil(
-                  context,
-                  '/inicio',
-                  (route) => false,
-                ); // Navega para início
-              },
-              child: const Text('OK'),
-            ),
-          ],
-        );
-      },
-    );
   }
 
   // Diálogo de erro
@@ -138,6 +108,42 @@ class _LoginTelaState extends State<LoginTela> {
         );
       },
     );
+  }
+
+  // Método para login com Google
+  Future<void> _loginComGoogle() async {
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      var cliente = await AuthService.signInWithGoogle();
+
+      setState(() {
+        _isLoading = false;
+      });
+
+      if (cliente != null) {
+        // Login bem-sucedido - navega para área logada
+        if (mounted) {
+          Navigator.pushNamedAndRemoveUntil(
+            context,
+            '/area-cliente-logado',
+            (route) => false,
+          );
+        }
+      } else {
+        // Usuário cancelou ou erro
+        if (mounted) {
+          _mostrarDialogoErro('Não foi possível fazer login com Google');
+        }
+      }
+    } catch (e) {
+      setState(() {
+        _isLoading = false;
+      });
+      _mostrarDialogoErro('Erro ao fazer login com Google. Tente novamente.');
+    }
   }
 
   @override
@@ -257,6 +263,58 @@ class _LoginTelaState extends State<LoginTela> {
                           ),
                   ),
                 ),
+
+                const SizedBox(height: 20),
+
+                // Divider com "ou"
+                Row(
+                  children: [
+                    Expanded(child: Divider(color: Colors.grey[400])),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      child: Text(
+                        'ou',
+                        style: TextStyle(color: Colors.grey[600]),
+                      ),
+                    ),
+                    Expanded(child: Divider(color: Colors.grey[400])),
+                  ],
+                ),
+
+                const SizedBox(height: 20),
+
+                // Botão Google Sign-In
+                SizedBox(
+                  width: double.infinity,
+                  height: 54,
+                  child: OutlinedButton.icon(
+                    onPressed: _isLoading ? null : _loginComGoogle,
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: Colors.black,
+                      side: BorderSide(color: Colors.grey[300]!, width: 1),
+                      backgroundColor: Colors.white,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
+                    icon: Image.network(
+                      'https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg',
+                      height: 24,
+                      width: 24,
+                      errorBuilder: (context, error, stackTrace) =>
+                          const Icon(Icons.g_mobiledata, size: 24),
+                    ),
+                    label: const Text(
+                      'Continuar com Google',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ),
+                ),
+
+                const SizedBox(height: 20),
               ],
             ),
           ),
