@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "948466691872",
+    "project_id": "pex2025-a2dc9",
+    "storage_bucket": "pex2025-a2dc9.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:948466691872:android:b499a907db5624b36d3145",
+        "android_client_info": {
+          "package_name": "com.example.pex"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "948466691872-48fqrib8ok57f00e7djibg3gbt4fqpdo.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.pex",
+            "certificate_hash": "4c0e1aef441fe75266d31e935b39ae9b40083f90"
+          }
+        },
+        {
+          "client_id": "948466691872-tdp8gl2cgbpucd58b6ubd8caemg8d3cf.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBAoOmYByzOK72ghDRCqfQ3hQKIJeTkvSI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "948466691872-tdp8gl2cgbpucd58b6ubd8caemg8d3cf.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
