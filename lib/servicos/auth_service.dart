@@ -1,6 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:flutter/foundation.dart';
 import '../modelos/cliente.dart';
 
 class AuthService {
@@ -9,12 +10,15 @@ class AuthService {
   static final GoogleSignIn _googleSignIn = GoogleSignIn();
 
   /// Cadastra um novo cliente com Firebase Authentication
-  /// Retorna true se o cadastro foi bem-sucedido, false se houve erro
-  static Future<bool> cadastrarCliente(Cliente novoCliente) async {
+  /// Retorna um Map com 'success' (bool) e 'message' (String)
+  static Future<Map<String, dynamic>> cadastrarCliente(Cliente novoCliente) async {
     try {
       // Verifica se a senha foi fornecida
       if (novoCliente.senha == null || novoCliente.senha!.isEmpty) {
-        return false;
+        return {
+          'success': false,
+          'message': 'Senha é obrigatória',
+        };
       }
 
       // Cria o usuário no Firebase Authentication
@@ -33,14 +37,42 @@ class AuthService {
         'authProvider': 'email',
       });
 
-      return true;
+      return {
+        'success': true,
+        'message': 'Cliente cadastrado com sucesso!',
+      };
     } on FirebaseAuthException catch (e) {
-      // Email já existe ou outro erro
-      print('Erro ao cadastrar: ${e.code}');
-      return false;
+      debugPrint('Erro ao cadastrar: ${e.code}');
+      
+      // Mapeia códigos de erro específicos para mensagens em português
+      String mensagem;
+      switch (e.code) {
+        case 'email-already-in-use':
+          mensagem = 'Este email já está cadastrado';
+          break;
+        case 'invalid-email':
+          mensagem = 'Email inválido';
+          break;
+        case 'operation-not-allowed':
+          mensagem = 'Cadastro com email/senha não está habilitado. Entre em contato com o suporte.';
+          break;
+        case 'weak-password':
+          mensagem = 'A senha é muito fraca';
+          break;
+        default:
+          mensagem = 'Erro ao cadastrar: ${e.message ?? e.code}';
+      }
+      
+      return {
+        'success': false,
+        'message': mensagem,
+      };
     } catch (e) {
-      print('Erro inesperado: $e');
-      return false;
+      debugPrint('Erro inesperado: $e');
+      return {
+        'success': false,
+        'message': 'Erro inesperado ao cadastrar. Tente novamente.',
+      };
     }
   }
 
@@ -67,14 +99,15 @@ class AuthService {
           email: data['email'] ?? email,
           telefone: data['telefone'] ?? '',
           senha: senha, // Mantém senha localmente para compatibilidade
+          profilePicture: data['profilePicture'],
         );
       }
       return null;
     } on FirebaseAuthException catch (e) {
-      print('Erro ao autenticar: ${e.code}');
+      debugPrint('Erro ao autenticar: ${e.code}');
       return null;
     } catch (e) {
-      print('Erro inesperado: $e');
+      debugPrint('Erro inesperado: $e');
       return null;
     }
   }
@@ -97,12 +130,100 @@ class AuthService {
           email: data['email'] ?? user.email ?? '',
           telefone: data['telefone'] ?? '',
           senha: '', // Senha não é armazenada
+          profilePicture: data['profilePicture'],
         );
       }
     } catch (e) {
-      print('Erro ao buscar cliente: $e');
+      debugPrint('Erro ao buscar cliente: $e');
     }
     return null;
+  }
+
+  /// Retorna os dados completos do usuário atual incluindo profilePicture
+  static Future<Map<String, dynamic>?> getCurrentUserData() async {
+    try {
+      User? user = _auth.currentUser;
+      if (user == null) return null;
+
+      DocumentSnapshot doc = await _firestore
+          .collection('users')
+          .doc(user.uid)
+          .get();
+
+      if (doc.exists) {
+        return doc.data() as Map<String, dynamic>;
+      }
+      return null;
+    } catch (e) {
+      debugPrint('Erro ao buscar dados do usuário: $e');
+      return null;
+    }
+  }
+
+  /// Atualiza o perfil do usuário (nome, telefone, profilePicture)
+  /// Retorna um Map com 'success' (bool) e 'message' (String)
+  static Future<Map<String, dynamic>> updateUserProfile({
+    required String nome,
+    String? telefone,
+    String? profilePicture,
+  }) async {
+    try {
+      User? user = _auth.currentUser;
+      if (user == null) {
+        return {
+          'success': false,
+          'message': 'Usuário não autenticado.',
+        };
+      }
+
+      // Valida o nome
+      if (nome.trim().isEmpty) {
+        return {
+          'success': false,
+          'message': 'Por favor, preencha todos os campos obrigatórios.',
+        };
+      }
+
+      // Prepara os dados para atualização
+      Map<String, dynamic> updateData = {
+        'nome': nome.trim(),
+        'telefone': telefone?.trim(),
+      };
+
+      // Adiciona profilePicture apenas se fornecido
+      if (profilePicture != null) {
+        updateData['profilePicture'] = profilePicture;
+      }
+
+      // Atualiza no Firestore
+      await _firestore
+          .collection('users')
+          .doc(user.uid)
+          .update(updateData);
+
+      return {
+        'success': true,
+        'message': 'Perfil atualizado com sucesso!',
+      };
+    } on FirebaseException catch (e) {
+      debugPrint('Erro Firebase ao atualizar perfil: ${e.code}');
+      if (e.code == 'unavailable') {
+        return {
+          'success': false,
+          'message': 'Sem conexão com a internet. Verifique sua conexão.',
+        };
+      }
+      return {
+        'success': false,
+        'message': 'Erro ao salvar alterações. Tente novamente.',
+      };
+    } catch (e) {
+      debugPrint('Erro inesperado ao atualizar perfil: $e');
+      return {
+        'success': false,
+        'message': 'Erro ao salvar alterações. Tente novamente.',
+      };
+    }
   }
 
   /// Verifica se há um cliente logado
@@ -186,15 +307,16 @@ class AuthService {
           telefone: data['telefone'],
           photoUrl: data['photoUrl'] ?? user.photoURL,
           authProvider: data['authProvider'] ?? 'google',
+          profilePicture: data['profilePicture'],
         );
       }
 
       return null;
     } on FirebaseAuthException catch (e) {
-      print('Erro ao autenticar com Google: ${e.code}');
+      debugPrint('Erro ao autenticar com Google: ${e.code}');
       return null;
     } catch (e) {
-      print('Erro inesperado ao autenticar com Google: $e');
+      debugPrint('Erro inesperado ao autenticar com Google: $e');
       return null;
     }
   }
@@ -212,8 +334,10 @@ class AuthService {
       if (user == null) return false;
 
       // Busca configuração de admins
-      DocumentSnapshot configDoc =
-          await _firestore.collection('config').doc('admins').get();
+      DocumentSnapshot configDoc = await _firestore
+          .collection('config')
+          .doc('admins')
+          .get();
 
       if (!configDoc.exists) return false;
 
@@ -222,7 +346,7 @@ class AuthService {
 
       return adminEmails.contains(user.email);
     } catch (e) {
-      print('Erro ao verificar admin: $e');
+      debugPrint('Erro ao verificar admin: $e');
       return false;
     }
   }
@@ -230,15 +354,17 @@ class AuthService {
   /// Busca número do WhatsApp da configuração
   static Future<String?> getWhatsAppNumber() async {
     try {
-      DocumentSnapshot configDoc =
-          await _firestore.collection('config').doc('admins').get();
+      DocumentSnapshot configDoc = await _firestore
+          .collection('config')
+          .doc('admins')
+          .get();
 
       if (!configDoc.exists) return null;
 
       Map<String, dynamic> data = configDoc.data() as Map<String, dynamic>;
       return data['whatsappNumber'];
     } catch (e) {
-      print('Erro ao buscar WhatsApp: $e');
+      debugPrint('Erro ao buscar WhatsApp: $e');
       return null;
     }
   }

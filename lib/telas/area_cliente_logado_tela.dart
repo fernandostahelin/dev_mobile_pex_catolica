@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../servicos/auth_service.dart';
 
 class AreaClienteLogadoTela extends StatelessWidget {
   const AreaClienteLogadoTela({super.key});
@@ -62,6 +63,64 @@ class AreaClienteLogadoTela extends StatelessWidget {
                         fontSize: 16,
                         fontWeight: FontWeight.normal,
                       ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 40),
+                SizedBox(
+                  width: double.infinity,
+                  child: OutlinedButton.icon(
+                    onPressed: () async {
+                      // Mostra diálogo de confirmação
+                      bool? confirmLogout = await showDialog<bool>(
+                        context: context,
+                        builder: (context) => AlertDialog(
+                          title: const Text('Sair'),
+                          content: const Text(
+                            'Deseja realmente sair da sua conta?',
+                          ),
+                          actions: [
+                            TextButton(
+                              onPressed: () => Navigator.pop(context, false),
+                              child: const Text('Cancelar'),
+                            ),
+                            TextButton(
+                              onPressed: () => Navigator.pop(context, true),
+                              style: TextButton.styleFrom(
+                                foregroundColor: Colors.red,
+                              ),
+                              child: const Text('Sair'),
+                            ),
+                          ],
+                        ),
+                      );
+
+                      if (confirmLogout == true) {
+                        // Faz logout
+                        await AuthService.signOutGoogle();
+
+                        if (context.mounted) {
+                          // Navega para a tela inicial
+                          Navigator.pushNamedAndRemoveUntil(
+                            context,
+                            '/inicio',
+                            (route) => false,
+                          );
+                        }
+                      }
+                    },
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: Colors.red,
+                      side: const BorderSide(color: Colors.red),
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    icon: const Icon(Icons.logout),
+                    label: const Text(
+                      'Sair da conta',
+                      style: TextStyle(fontSize: 16),
                     ),
                   ),
                 ),

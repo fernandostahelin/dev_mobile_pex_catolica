@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:url_launcher/url_launcher.dart';
+import 'package:open_filex/open_filex.dart';
 import 'package:intl/intl.dart';
 import '../modelos/documento.dart';
 import '../servicos/documento_service.dart';
@@ -40,16 +40,21 @@ class _DocumentosTelaState extends State<DocumentosTela> {
         return;
       }
 
+      debugPrint('Buscando documentos para o email: $email');
+
       List<Documento> documentos =
           await DocumentoService.getDocumentosPorCliente(email);
+
+      debugPrint('Documentos encontrados: ${documentos.length}');
 
       setState(() {
         _documentos = documentos;
         _isLoading = false;
       });
     } catch (e) {
+      debugPrint('Erro ao carregar documentos: $e');
       setState(() {
-        _errorMessage = 'Erro ao carregar documentos';
+        _errorMessage = 'Erro ao carregar documentos: $e';
         _isLoading = false;
       });
     }
@@ -71,13 +76,19 @@ class _DocumentosTelaState extends State<DocumentosTela> {
       if (mounted) Navigator.pop(context);
 
       if (filePath != null) {
-        // Abrir o arquivo com o visualizador padrão
-        final Uri fileUri = Uri.file(filePath);
-        if (await canLaunchUrl(fileUri)) {
-          await launchUrl(fileUri, mode: LaunchMode.externalApplication);
-        } else {
+        // Abrir o arquivo com o visualizador padrão usando OpenFilex
+        // Especifica o tipo MIME para filtrar apenas apps que suportam PDF
+        final result = await OpenFilex.open(
+          filePath,
+          type: 'application/pdf',
+        );
+
+        // Verifica se houve erro ao abrir
+        if (result.type != ResultType.done) {
           if (mounted) {
-            _mostrarErro('Não foi possível abrir o documento');
+            _mostrarErro(
+              'Não foi possível abrir o documento: ${result.message}',
+            );
           }
         }
       } else {

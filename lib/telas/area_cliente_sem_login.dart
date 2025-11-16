@@ -1,7 +1,36 @@
 import 'package:flutter/material.dart';
+import '../servicos/auth_service.dart';
 
-class AreaClienteSemLogin extends StatelessWidget {
+class AreaClienteSemLogin extends StatefulWidget {
   const AreaClienteSemLogin({super.key});
+
+  @override
+  State<AreaClienteSemLogin> createState() => _AreaClienteSemLoginState();
+}
+
+class _AreaClienteSemLoginState extends State<AreaClienteSemLogin> {
+  @override
+  void initState() {
+    super.initState();
+    _checkLoginStatus();
+  }
+
+  Future<void> _checkLoginStatus() async {
+    try {
+      // Verifica se o usuário já está logado
+      if (AuthService.estaLogado) {
+        // Redireciona para a área logada
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted) {
+            Navigator.pushReplacementNamed(context, '/area-cliente-logado');
+          }
+        });
+      }
+    } catch (e) {
+      // Em ambiente de teste, Firebase pode não estar inicializado
+      // Não faz nada nesse caso
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -14,7 +43,7 @@ class AreaClienteSemLogin extends StatelessWidget {
               // Espaçamento superior
               const SizedBox(height: 40),
 
-              // Placeholder da imagem/logo
+              // Logo
               Container(
                 width: double.infinity,
                 height: 200,
@@ -22,10 +51,12 @@ class AreaClienteSemLogin extends StatelessWidget {
                   color: Colors.grey[200],
                   borderRadius: BorderRadius.circular(16),
                 ),
-                child: const Icon(
-                  Icons.landscape,
-                  size: 80,
-                  color: Colors.grey,
+                child: Padding(
+                  padding: const EdgeInsets.all(20.0),
+                  child: Image.asset(
+                    'assets/images/icone_alicerce.png',
+                    fit: BoxFit.contain,
+                  ),
                 ),
               ),
 
@@ -112,7 +143,13 @@ class AreaClienteSemLogin extends StatelessWidget {
           if (index == 0) {
             Navigator.pushNamed(context, '/inicio');
           } else if (index == 1) {
-            Navigator.pushNamed(context, '/area-cliente-sem-login');
+            // Verifica se o usuário está logado
+            bool estaLogado = AuthService.estaLogado;
+            if (estaLogado) {
+              Navigator.pushReplacementNamed(context, '/area-cliente-logado');
+            } else {
+              Navigator.pushNamed(context, '/area-cliente-sem-login');
+            }
           }
         },
       ),

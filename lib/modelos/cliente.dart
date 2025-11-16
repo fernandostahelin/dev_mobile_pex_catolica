@@ -5,6 +5,7 @@ class Cliente {
   final String? senha;
   final String? photoUrl;
   final String? authProvider;
+  final String? profilePicture;
 
   Cliente({
     required this.nome,
@@ -13,6 +14,7 @@ class Cliente {
     this.senha,
     this.photoUrl,
     this.authProvider,
+    this.profilePicture,
   });
 
   // Método para converter Cliente para Map (útil para armazenamento)
@@ -24,6 +26,7 @@ class Cliente {
       'senha': senha,
       'photoUrl': photoUrl,
       'authProvider': authProvider,
+      'profilePicture': profilePicture,
     };
   }
 
@@ -36,6 +39,7 @@ class Cliente {
       senha: map['senha'],
       photoUrl: map['photoUrl'],
       authProvider: map['authProvider'] ?? 'email',
+      profilePicture: map['profilePicture'],
     );
   }
 

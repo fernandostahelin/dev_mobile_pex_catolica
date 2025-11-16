@@ -85,7 +85,8 @@ class Propriedade {
       imageUrl: map['imageUrl'] ?? '',
       status: map['status'] ?? 'disponivel',
       tipo: map['tipo'] ?? 'casa',
-      dataAdicionada: (map['dataAdicionada'] as Timestamp?)?.toDate() ?? DateTime.now(),
+      dataAdicionada:
+          (map['dataAdicionada'] as Timestamp?)?.toDate() ?? DateTime.now(),
     );
   }
 
@@ -117,4 +118,3 @@ class Propriedade {
     return 'Propriedade(id: $id, nome: $nome, localizacao: $localizacao, preco: $preco)';
   }
 }
-

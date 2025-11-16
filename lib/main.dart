@@ -1,3 +1,5 @@
+import 'dart:async';
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'telas/area_cliente_sem_login.dart';
@@ -10,11 +12,43 @@ import 'telas/documentos_tela.dart';
 import 'telas/admin_panel_tela.dart';
 import 'telas/adicionar_propriedade_tela.dart';
 import 'modelos/propriedade.dart';
+import 'widgets/erro_widget.dart';
+import 'servicos/erro_service.dart';
 
 void main() async {
+  // Garante que o Flutter está inicializado
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp();
-  runApp(const PexApp());
+
+  // Configura o manipulador de erros global do Flutter
+  FlutterError.onError = (FlutterErrorDetails details) {
+    // Log do erro em modo debug
+    ErroService.logErro(details.exception, details.stack);
+    
+    // Apresenta o erro customizado ao usuário
+    FlutterError.presentError(details);
+  };
+
+  // Configura o manipulador de erros para erros fora do Flutter (async)
+  PlatformDispatcher.instance.onError = (error, stack) {
+    ErroService.logErro(error, stack);
+    return true;
+  };
+
+  // Configura o widget de erro customizado
+  ErrorWidget.builder = (FlutterErrorDetails details) {
+    return ErroWidget(errorDetails: details);
+  };
+
+  // Executa o app dentro de uma zona para capturar erros assíncronos
+  runZonedGuarded(
+    () async {
+      await Firebase.initializeApp();
+      runApp(const PexApp());
+    },
+    (error, stackTrace) {
+      ErroService.logErro(error, stackTrace);
+    },
+  );
 }
 
 class PexApp extends StatelessWidget {
@@ -68,7 +102,8 @@ class PexApp extends StatelessWidget {
         if (settings.name == '/editar-propriedade') {
           final propriedade = settings.arguments as Propriedade;
           return MaterialPageRoute(
-            builder: (context) => AdicionarPropriedadeTela(propriedade: propriedade),
+            builder: (context) =>
+                AdicionarPropriedadeTela(propriedade: propriedade),
           );
         }
         return null;

@@ -7,11 +7,12 @@ import '../servicos/propriedade_service.dart';
 
 class AdicionarPropriedadeTela extends StatefulWidget {
   final Propriedade? propriedade;
-  
+
   const AdicionarPropriedadeTela({super.key, this.propriedade});
 
   @override
-  State<AdicionarPropriedadeTela> createState() => _AdicionarPropriedadeTelaState();
+  State<AdicionarPropriedadeTela> createState() =>
+      _AdicionarPropriedadeTelaState();
 }
 
 class _AdicionarPropriedadeTelaState extends State<AdicionarPropriedadeTela> {
@@ -19,7 +20,7 @@ class _AdicionarPropriedadeTelaState extends State<AdicionarPropriedadeTela> {
   final _nomeController = TextEditingController();
   final _localizacaoController = TextEditingController();
   final _precoController = TextEditingController();
-  
+
   String _tipo = 'casa';
   String _status = 'disponivel';
   File? _imageFile;
@@ -61,7 +62,7 @@ class _AdicionarPropriedadeTelaState extends State<AdicionarPropriedadeTela> {
         // Verifica tamanho do arquivo (máximo 5MB)
         File file = File(image.path);
         int fileSize = await file.length();
-        
+
         if (fileSize > 5 * 1024 * 1024) {
           if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
@@ -111,14 +112,22 @@ class _AdicionarPropriedadeTelaState extends State<AdicionarPropriedadeTela> {
         imageUrl: _isEditing ? widget.propriedade!.imageUrl : '',
         status: _status,
         tipo: _tipo,
-        dataAdicionada: _isEditing ? widget.propriedade!.dataAdicionada : DateTime.now(),
+        dataAdicionada: _isEditing
+            ? widget.propriedade!.dataAdicionada
+            : DateTime.now(),
       );
 
       bool sucesso;
       if (_isEditing) {
-        sucesso = await PropriedadeService.atualizarPropriedade(propriedade, _imageFile);
+        sucesso = await PropriedadeService.atualizarPropriedade(
+          propriedade,
+          _imageFile,
+        );
       } else {
-        sucesso = await PropriedadeService.adicionarPropriedade(propriedade, _imageFile);
+        sucesso = await PropriedadeService.adicionarPropriedade(
+          propriedade,
+          _imageFile,
+        );
       }
 
       setState(() {
@@ -129,7 +138,11 @@ class _AdicionarPropriedadeTelaState extends State<AdicionarPropriedadeTela> {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text(_isEditing ? 'Propriedade atualizada!' : 'Propriedade adicionada!'),
+              content: Text(
+                _isEditing
+                    ? 'Propriedade atualizada!'
+                    : 'Propriedade adicionada!',
+              ),
             ),
           );
           Navigator.pop(context);
@@ -145,11 +158,11 @@ class _AdicionarPropriedadeTelaState extends State<AdicionarPropriedadeTela> {
       setState(() {
         _isLoading = false;
       });
-      
+
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Erro: $e')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Erro: $e')));
       }
     }
   }
@@ -158,7 +171,9 @@ class _AdicionarPropriedadeTelaState extends State<AdicionarPropriedadeTela> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(_isEditing ? 'Editar Propriedade' : 'Adicionar Propriedade'),
+        title: Text(
+          _isEditing ? 'Editar Propriedade' : 'Adicionar Propriedade',
+        ),
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
       ),
       body: SingleChildScrollView(
@@ -183,30 +198,31 @@ class _AdicionarPropriedadeTelaState extends State<AdicionarPropriedadeTela> {
                     child: _imageFile != null
                         ? ClipRRect(
                             borderRadius: BorderRadius.circular(12),
-                            child: Image.file(
-                              _imageFile!,
+                            child: Image.file(_imageFile!, fit: BoxFit.cover),
+                          )
+                        : _isEditing && widget.propriedade!.imageUrl.isNotEmpty
+                        ? ClipRRect(
+                            borderRadius: BorderRadius.circular(12),
+                            child: Image.network(
+                              widget.propriedade!.imageUrl,
                               fit: BoxFit.cover,
                             ),
                           )
-                        : _isEditing && widget.propriedade!.imageUrl.isNotEmpty
-                            ? ClipRRect(
-                                borderRadius: BorderRadius.circular(12),
-                                child: Image.network(
-                                  widget.propriedade!.imageUrl,
-                                  fit: BoxFit.cover,
-                                ),
-                              )
-                            : Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Icon(Icons.add_photo_alternate, size: 60, color: Colors.grey[400]),
-                                  const SizedBox(height: 8),
-                                  Text(
-                                    'Toque para adicionar imagem',
-                                    style: TextStyle(color: Colors.grey[600]),
-                                  ),
-                                ],
+                        : Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(
+                                Icons.add_photo_alternate,
+                                size: 60,
+                                color: Colors.grey[400],
                               ),
+                              const SizedBox(height: 8),
+                              Text(
+                                'Toque para adicionar imagem',
+                                style: TextStyle(color: Colors.grey[600]),
+                              ),
+                            ],
+                          ),
                   ),
                 ),
               ),
@@ -257,7 +273,9 @@ class _AdicionarPropriedadeTelaState extends State<AdicionarPropriedadeTela> {
                   border: OutlineInputBorder(),
                   prefixIcon: Icon(Icons.attach_money),
                 ),
-                keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                keyboardType: const TextInputType.numberWithOptions(
+                  decimal: true,
+                ),
                 inputFormatters: [
                   FilteringTextInputFormatter.allow(RegExp(r'[0-9.,]')),
                 ],
@@ -357,7 +375,9 @@ class _AdicionarPropriedadeTelaState extends State<AdicionarPropriedadeTela> {
                 children: [
                   Expanded(
                     child: OutlinedButton(
-                      onPressed: _isLoading ? null : () => Navigator.pop(context),
+                      onPressed: _isLoading
+                          ? null
+                          : () => Navigator.pop(context),
                       child: const Text('Cancelar'),
                     ),
                   ),
@@ -375,7 +395,9 @@ class _AdicionarPropriedadeTelaState extends State<AdicionarPropriedadeTela> {
                               width: 20,
                               child: CircularProgressIndicator(
                                 strokeWidth: 2,
-                                valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                                valueColor: AlwaysStoppedAnimation<Color>(
+                                  Colors.white,
+                                ),
                               ),
                             )
                           : Text(_isEditing ? 'Atualizar' : 'Salvar'),
@@ -390,4 +412,3 @@ class _AdicionarPropriedadeTelaState extends State<AdicionarPropriedadeTela> {
     );
   }
 }
-

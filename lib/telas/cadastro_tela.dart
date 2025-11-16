@@ -82,15 +82,10 @@ class _CadastroTelaState extends State<CadastroTela> {
 
     if (digitsOnly.length <= 2) {
       _telefoneController.text = digitsOnly;
-    } else if (digitsOnly.length <= 5) {
-      _telefoneController.text =
-          '(${digitsOnly.substring(0, 2)}) ${digitsOnly.substring(2)}';
-    } else if (digitsOnly.length <= 10) {
-      _telefoneController.text =
-          '(${digitsOnly.substring(0, 2)}) ${digitsOnly.substring(2)}';
     } else if (digitsOnly.length <= 11) {
+      // Brazilian area code is always 2 digits
       _telefoneController.text =
-          '(${digitsOnly.substring(0, 3)}) ${digitsOnly.substring(3)}';
+          '(${digitsOnly.substring(0, 2)}) ${digitsOnly.substring(2)}';
     }
 
     _telefoneController.selection = TextSelection.fromPosition(
@@ -116,18 +111,18 @@ class _CadastroTelaState extends State<CadastroTela> {
         senha: _senhaController.text,
       );
 
-      bool sucesso = await AuthService.cadastrarCliente(novoCliente);
+      Map<String, dynamic> resultado = await AuthService.cadastrarCliente(novoCliente);
 
       setState(() {
         _isLoading = false;
       });
 
-      if (sucesso) {
+      if (resultado['success']) {
         // Mostra diálogo de sucesso
         _mostrarDialogoSucesso();
       } else {
-        // Mostra erro se email já existe
-        _mostrarDialogoErro('Este email já está cadastrado');
+        // Mostra erro com mensagem específica
+        _mostrarDialogoErro(resultado['message']);
       }
     } catch (e) {
       setState(() {

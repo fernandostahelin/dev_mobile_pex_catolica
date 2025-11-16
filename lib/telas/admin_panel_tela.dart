@@ -27,7 +27,9 @@ class _AdminPanelTelaState extends State<AdminPanelTela> {
       if (mounted) {
         Navigator.pushReplacementNamed(context, '/inicio');
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Acesso negado. Apenas administradores.')),
+          const SnackBar(
+            content: Text('Acesso negado. Apenas administradores.'),
+          ),
         );
       }
       return;
@@ -88,7 +90,7 @@ class _AdminPanelTelaState extends State<AdminPanelTela> {
 
     if (mounted) {
       Navigator.pop(context); // Fecha loading
-      
+
       if (sucesso) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Propriedade excluída com sucesso')),
@@ -112,112 +114,115 @@ class _AdminPanelTelaState extends State<AdminPanelTela> {
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
           : _propriedades.isEmpty
-              ? Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(Icons.home_outlined, size: 80, color: Colors.grey[400]),
-                      const SizedBox(height: 16),
-                      Text(
-                        'Nenhuma propriedade cadastrada',
-                        style: TextStyle(fontSize: 18, color: Colors.grey[600]),
-                      ),
-                      const SizedBox(height: 16),
-                      ElevatedButton.icon(
-                        onPressed: () async {
-                          await Navigator.pushNamed(context, '/adicionar-propriedade');
-                          _carregarPropriedades();
-                        },
-                        icon: const Icon(Icons.add),
-                        label: const Text('Adicionar Primeira Propriedade'),
-                      ),
-                    ],
+          ? Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.home_outlined, size: 80, color: Colors.grey[400]),
+                  const SizedBox(height: 16),
+                  Text(
+                    'Nenhuma propriedade cadastrada',
+                    style: TextStyle(fontSize: 18, color: Colors.grey[600]),
                   ),
-                )
-              : RefreshIndicator(
-                  onRefresh: _carregarPropriedades,
-                  child: ListView.builder(
-                    padding: const EdgeInsets.all(16),
-                    itemCount: _propriedades.length,
-                    itemBuilder: (context, index) {
-                      Propriedade propriedade = _propriedades[index];
-                      return Card(
-                        margin: const EdgeInsets.only(bottom: 16),
-                        child: ListTile(
-                          contentPadding: const EdgeInsets.all(12),
-                          leading: ClipRRect(
-                            borderRadius: BorderRadius.circular(8),
-                            child: CachedNetworkImage(
-                              imageUrl: propriedade.imageUrl,
-                              width: 80,
-                              height: 80,
-                              fit: BoxFit.cover,
-                              placeholder: (context, url) => Container(
-                                width: 80,
-                                height: 80,
-                                color: Colors.grey[300],
-                                child: const Icon(Icons.home),
-                              ),
-                              errorWidget: (context, url, error) => Container(
-                                width: 80,
-                                height: 80,
-                                color: Colors.grey[300],
-                                child: const Icon(Icons.home),
-                              ),
-                            ),
+                  const SizedBox(height: 16),
+                  ElevatedButton.icon(
+                    onPressed: () async {
+                      await Navigator.pushNamed(
+                        context,
+                        '/adicionar-propriedade',
+                      );
+                      _carregarPropriedades();
+                    },
+                    icon: const Icon(Icons.add),
+                    label: const Text('Adicionar Primeira Propriedade'),
+                  ),
+                ],
+              ),
+            )
+          : RefreshIndicator(
+              onRefresh: _carregarPropriedades,
+              child: ListView.builder(
+                padding: const EdgeInsets.all(16),
+                itemCount: _propriedades.length,
+                itemBuilder: (context, index) {
+                  Propriedade propriedade = _propriedades[index];
+                  return Card(
+                    margin: const EdgeInsets.only(bottom: 16),
+                    child: ListTile(
+                      contentPadding: const EdgeInsets.all(12),
+                      leading: ClipRRect(
+                        borderRadius: BorderRadius.circular(8),
+                        child: CachedNetworkImage(
+                          imageUrl: propriedade.imageUrl,
+                          width: 80,
+                          height: 80,
+                          fit: BoxFit.cover,
+                          placeholder: (context, url) => Container(
+                            width: 80,
+                            height: 80,
+                            color: Colors.grey[300],
+                            child: const Icon(Icons.home),
                           ),
-                          title: Text(
-                            propriedade.nome,
-                            style: const TextStyle(fontWeight: FontWeight.bold),
-                          ),
-                          subtitle: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              const SizedBox(height: 4),
-                              Text(propriedade.localizacao),
-                              const SizedBox(height: 4),
-                              Text(
-                                propriedade.formattedPrice,
-                                style: const TextStyle(
-                                  color: Colors.green,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                              const SizedBox(height: 4),
-                              Text(
-                                propriedade.statusText,
-                                style: TextStyle(
-                                  color: _getStatusColor(propriedade.status),
-                                  fontSize: 12,
-                                ),
-                              ),
-                            ],
-                          ),
-                          trailing: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              IconButton(
-                                icon: const Icon(Icons.edit, color: Colors.blue),
-                                onPressed: () async {
-                                  await Navigator.pushNamed(
-                                    context,
-                                    '/editar-propriedade',
-                                    arguments: propriedade,
-                                  );
-                                  _carregarPropriedades();
-                                },
-                              ),
-                              IconButton(
-                                icon: const Icon(Icons.delete, color: Colors.red),
-                                onPressed: () => _confirmarDelete(propriedade),
-                              ),
-                            ],
+                          errorWidget: (context, url, error) => Container(
+                            width: 80,
+                            height: 80,
+                            color: Colors.grey[300],
+                            child: const Icon(Icons.home),
                           ),
                         ),
-                      );
-                    },
-                  ),
-                ),
+                      ),
+                      title: Text(
+                        propriedade.nome,
+                        style: const TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                      subtitle: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const SizedBox(height: 4),
+                          Text(propriedade.localizacao),
+                          const SizedBox(height: 4),
+                          Text(
+                            propriedade.formattedPrice,
+                            style: const TextStyle(
+                              color: Colors.green,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            propriedade.statusText,
+                            style: TextStyle(
+                              color: _getStatusColor(propriedade.status),
+                              fontSize: 12,
+                            ),
+                          ),
+                        ],
+                      ),
+                      trailing: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          IconButton(
+                            icon: const Icon(Icons.edit, color: Colors.blue),
+                            onPressed: () async {
+                              await Navigator.pushNamed(
+                                context,
+                                '/editar-propriedade',
+                                arguments: propriedade,
+                              );
+                              _carregarPropriedades();
+                            },
+                          ),
+                          IconButton(
+                            icon: const Icon(Icons.delete, color: Colors.red),
+                            onPressed: () => _confirmarDelete(propriedade),
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ),
       floatingActionButton: FloatingActionButton(
         onPressed: () async {
           await Navigator.pushNamed(context, '/adicionar-propriedade');
@@ -241,4 +246,3 @@ class _AdminPanelTelaState extends State<AdminPanelTela> {
     }
   }
 }
-

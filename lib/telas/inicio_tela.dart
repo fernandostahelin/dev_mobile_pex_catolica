@@ -36,7 +36,7 @@ class _InicioTelaState extends State<InicioTela> {
 
     // Verifica se é admin
     bool isAdmin = await AuthService.isAdmin();
-    
+
     // Carrega propriedades
     List<Propriedade> propriedades = await PropriedadeService.getPropriedades();
 
@@ -71,7 +71,9 @@ class _InicioTelaState extends State<InicioTela> {
 
     // Filtro de localização
     if (_localizacaoFiltro != null && _localizacaoFiltro != 'todos') {
-      filtered = filtered.where((p) => p.localizacao == _localizacaoFiltro).toList();
+      filtered = filtered
+          .where((p) => p.localizacao == _localizacaoFiltro)
+          .toList();
     }
 
     // Ordenação
@@ -90,9 +92,9 @@ class _InicioTelaState extends State<InicioTela> {
 
   void _mostrarDetalhes(Propriedade propriedade) async {
     String? whatsappNumber = await AuthService.getWhatsAppNumber();
-    
+
     if (!mounted) return;
-    
+
     showDialog(
       context: context,
       builder: (context) => Dialog(
@@ -116,7 +118,7 @@ class _InicioTelaState extends State<InicioTela> {
                 child: const Icon(Icons.home, size: 80, color: Colors.grey),
               ),
             ),
-            
+
             Padding(
               padding: const EdgeInsets.all(20),
               child: Column(
@@ -131,7 +133,7 @@ class _InicioTelaState extends State<InicioTela> {
                     ),
                   ),
                   const SizedBox(height: 12),
-                  
+
                   // Tipo
                   Row(
                     children: [
@@ -144,11 +146,15 @@ class _InicioTelaState extends State<InicioTela> {
                     ],
                   ),
                   const SizedBox(height: 8),
-                  
+
                   // Localização
                   Row(
                     children: [
-                      const Icon(Icons.location_on, size: 20, color: Colors.grey),
+                      const Icon(
+                        Icons.location_on,
+                        size: 20,
+                        color: Colors.grey,
+                      ),
                       const SizedBox(width: 8),
                       Expanded(
                         child: Text(
@@ -159,11 +165,15 @@ class _InicioTelaState extends State<InicioTela> {
                     ],
                   ),
                   const SizedBox(height: 8),
-                  
+
                   // Preço
                   Row(
                     children: [
-                      const Icon(Icons.attach_money, size: 20, color: Colors.grey),
+                      const Icon(
+                        Icons.attach_money,
+                        size: 20,
+                        color: Colors.grey,
+                      ),
                       const SizedBox(width: 8),
                       Text(
                         propriedade.formattedPrice,
@@ -176,10 +186,13 @@ class _InicioTelaState extends State<InicioTela> {
                     ],
                   ),
                   const SizedBox(height: 8),
-                  
+
                   // Status
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 6,
+                    ),
                     decoration: BoxDecoration(
                       color: _getStatusColor(propriedade.status),
                       borderRadius: BorderRadius.circular(12),
@@ -192,14 +205,15 @@ class _InicioTelaState extends State<InicioTela> {
                       ),
                     ),
                   ),
-                  
+
                   const SizedBox(height: 20),
-                  
+
                   // Botão WhatsApp
                   SizedBox(
                     width: double.infinity,
                     child: ElevatedButton.icon(
-                      onPressed: () => _abrirWhatsApp(propriedade, whatsappNumber),
+                      onPressed: () =>
+                          _abrirWhatsApp(propriedade, whatsappNumber),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color(0xFF25D366),
                         foregroundColor: Colors.white,
@@ -239,7 +253,8 @@ class _InicioTelaState extends State<InicioTela> {
       return;
     }
 
-    String mensagem = '''Olá! Tenho interesse no imóvel:
+    String mensagem =
+        '''Olá! Tenho interesse no imóvel:
 
 📍 *${propriedade.nome}*
 🏠 ${propriedade.tipoText}
@@ -249,7 +264,7 @@ class _InicioTelaState extends State<InicioTela> {
 Gostaria de mais informações.''';
 
     String url = 'https://wa.me/$number?text=${Uri.encodeComponent(mensagem)}';
-    
+
     if (await canLaunchUrl(Uri.parse(url))) {
       await launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
     } else {
@@ -294,7 +309,10 @@ Gostaria de mais informações.''';
                   children: [
                     const Text(
                       'Filtros',
-                      style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                     TextButton(
                       onPressed: () {
@@ -318,48 +336,81 @@ Gostaria de mais informações.''';
                   padding: const EdgeInsets.all(16),
                   children: [
                     // Tipo
-                    const Text('Tipo', style: TextStyle(fontWeight: FontWeight.bold)),
+                    const Text(
+                      'Tipo',
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
                     Wrap(
                       spacing: 8,
                       children: [
                         _buildFilterChipLocal('Todos', null, tipoTemp, (value) {
                           setModalState(() => tipoTemp = value);
                         }),
-                        _buildFilterChipLocal('Casa', 'casa', tipoTemp, (value) {
+                        _buildFilterChipLocal('Casa', 'casa', tipoTemp, (
+                          value,
+                        ) {
                           setModalState(() => tipoTemp = value);
                         }),
-                        _buildFilterChipLocal('Apartamento', 'apartamento', tipoTemp, (value) {
-                          setModalState(() => tipoTemp = value);
-                        }),
+                        _buildFilterChipLocal(
+                          'Apartamento',
+                          'apartamento',
+                          tipoTemp,
+                          (value) {
+                            setModalState(() => tipoTemp = value);
+                          },
+                        ),
                       ],
                     ),
-                    
+
                     const SizedBox(height: 20),
-                    
+
                     // Status
-                    const Text('Status', style: TextStyle(fontWeight: FontWeight.bold)),
+                    const Text(
+                      'Status',
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
                     Wrap(
                       spacing: 8,
                       children: [
-                        _buildFilterChipLocal('Todos', null, statusTemp, (value) {
+                        _buildFilterChipLocal('Todos', null, statusTemp, (
+                          value,
+                        ) {
                           setModalState(() => statusTemp = value);
                         }),
-                        _buildFilterChipLocal('Disponível', 'disponivel', statusTemp, (value) {
-                          setModalState(() => statusTemp = value);
-                        }),
-                        _buildFilterChipLocal('Vendido', 'vendido', statusTemp, (value) {
-                          setModalState(() => statusTemp = value);
-                        }),
-                        _buildFilterChipLocal('Alugado', 'alugado', statusTemp, (value) {
-                          setModalState(() => statusTemp = value);
-                        }),
+                        _buildFilterChipLocal(
+                          'Disponível',
+                          'disponivel',
+                          statusTemp,
+                          (value) {
+                            setModalState(() => statusTemp = value);
+                          },
+                        ),
+                        _buildFilterChipLocal(
+                          'Vendido',
+                          'vendido',
+                          statusTemp,
+                          (value) {
+                            setModalState(() => statusTemp = value);
+                          },
+                        ),
+                        _buildFilterChipLocal(
+                          'Alugado',
+                          'alugado',
+                          statusTemp,
+                          (value) {
+                            setModalState(() => statusTemp = value);
+                          },
+                        ),
                       ],
                     ),
-                    
+
                     const SizedBox(height: 20),
-                    
+
                     // Ordenação
-                    const Text('Ordenar por', style: TextStyle(fontWeight: FontWeight.bold)),
+                    const Text(
+                      'Ordenar por',
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
                     const SizedBox(height: 8),
                     Wrap(
                       spacing: 8,
@@ -393,9 +444,9 @@ Gostaria de mais informações.''';
                         ),
                       ],
                     ),
-                    
+
                     const SizedBox(height: 20),
-                    
+
                     ElevatedButton(
                       onPressed: () {
                         setState(() {
@@ -418,7 +469,12 @@ Gostaria de mais informações.''';
     );
   }
 
-  Widget _buildFilterChipLocal(String label, String? value, String? currentValue, ValueChanged<String?> onChanged) {
+  Widget _buildFilterChipLocal(
+    String label,
+    String? value,
+    String? currentValue,
+    ValueChanged<String?> onChanged,
+  ) {
     bool isSelected = currentValue == value;
     return FilterChip(
       label: Text(label),
@@ -428,7 +484,6 @@ Gostaria de mais informações.''';
       },
     );
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -449,7 +504,9 @@ Gostaria de mais informações.''';
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(30),
                         ),
-                        contentPadding: const EdgeInsets.symmetric(horizontal: 20),
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 20,
+                        ),
                       ),
                       onChanged: (value) {
                         setState(() {
@@ -470,42 +527,51 @@ Gostaria de mais informações.''';
                 ],
               ),
             ),
-            
+
             // Lista de propriedades
             Expanded(
               child: _isLoading
                   ? const Center(child: CircularProgressIndicator())
                   : _propriedadesFiltradas.isEmpty
-                      ? Center(
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Icon(Icons.home_outlined, size: 80, color: Colors.grey[400]),
-                              const SizedBox(height: 16),
-                              Text(
-                                'Nenhum imóvel encontrado',
-                                style: TextStyle(fontSize: 18, color: Colors.grey[600]),
-                              ),
-                            ],
+                  ? Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Icons.home_outlined,
+                            size: 80,
+                            color: Colors.grey[400],
                           ),
-                        )
-                      : RefreshIndicator(
-                          onRefresh: _carregarDados,
-                          child: GridView.builder(
-                            padding: const EdgeInsets.all(16),
-                            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                          const SizedBox(height: 16),
+                          Text(
+                            'Nenhum imóvel encontrado',
+                            style: TextStyle(
+                              fontSize: 18,
+                              color: Colors.grey[600],
+                            ),
+                          ),
+                        ],
+                      ),
+                    )
+                  : RefreshIndicator(
+                      onRefresh: _carregarDados,
+                      child: GridView.builder(
+                        padding: const EdgeInsets.all(16),
+                        gridDelegate:
+                            const SliverGridDelegateWithFixedCrossAxisCount(
                               crossAxisCount: 2,
                               childAspectRatio: 0.75,
                               crossAxisSpacing: 12,
                               mainAxisSpacing: 12,
                             ),
-                            itemCount: _propriedadesFiltradas.length,
-                            itemBuilder: (context, index) {
-                              Propriedade propriedade = _propriedadesFiltradas[index];
-                              return _buildPropertyCard(propriedade);
-                            },
-                          ),
-                        ),
+                        itemCount: _propriedadesFiltradas.length,
+                        itemBuilder: (context, index) {
+                          Propriedade propriedade =
+                              _propriedadesFiltradas[index];
+                          return _buildPropertyCard(propriedade);
+                        },
+                      ),
+                    ),
             ),
           ],
         ),
@@ -513,7 +579,10 @@ Gostaria de mais informações.''';
       floatingActionButton: _isAdmin
           ? FloatingActionButton(
               onPressed: () {
-                Navigator.pushNamed(context, '/admin-panel').then((_) => _carregarDados());
+                Navigator.pushNamed(
+                  context,
+                  '/admin-panel',
+                ).then((_) => _carregarDados());
               },
               child: const Icon(Icons.add),
             )
@@ -523,11 +592,20 @@ Gostaria de mais informações.''';
         currentIndex: 0,
         items: const [
           BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Início'),
-          BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Área do Cliente'),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.person),
+            label: 'Área do Cliente',
+          ),
         ],
-        onTap: (index) {
+        onTap: (index) async {
           if (index == 1) {
-            Navigator.pushNamed(context, '/area-cliente-sem-login');
+            // Verifica se o usuário está logado
+            bool estaLogado = AuthService.estaLogado;
+            if (estaLogado) {
+              Navigator.pushNamed(context, '/area-cliente-logado');
+            } else {
+              Navigator.pushNamed(context, '/area-cliente-sem-login');
+            }
           }
         },
       ),
@@ -557,7 +635,11 @@ Gostaria de mais informações.''';
                     ),
                     errorWidget: (context, url, error) => Container(
                       color: Colors.grey[300],
-                      child: const Icon(Icons.home, size: 40, color: Colors.grey),
+                      child: const Icon(
+                        Icons.home,
+                        size: 40,
+                        color: Colors.grey,
+                      ),
                     ),
                   ),
                   // Badge de status
@@ -565,7 +647,10 @@ Gostaria de mais informações.''';
                     top: 8,
                     right: 8,
                     child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 4,
+                      ),
                       decoration: BoxDecoration(
                         color: _getStatusColor(propriedade.status),
                         borderRadius: BorderRadius.circular(8),
@@ -583,7 +668,7 @@ Gostaria de mais informações.''';
                 ],
               ),
             ),
-            
+
             // Informações
             Padding(
               padding: const EdgeInsets.all(8),
@@ -602,7 +687,11 @@ Gostaria de mais informações.''';
                   const SizedBox(height: 4),
                   Row(
                     children: [
-                      const Icon(Icons.location_on, size: 14, color: Colors.grey),
+                      const Icon(
+                        Icons.location_on,
+                        size: 14,
+                        color: Colors.grey,
+                      ),
                       const SizedBox(width: 4),
                       Expanded(
                         child: Text(

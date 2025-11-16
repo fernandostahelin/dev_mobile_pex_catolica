@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
+import 'package:flutter/foundation.dart';
 import '../modelos/propriedade.dart';
 
 class PropriedadeService {
@@ -17,10 +18,13 @@ class PropriedadeService {
           .get();
 
       return snapshot.docs
-          .map((doc) => Propriedade.fromMap(doc.id, doc.data() as Map<String, dynamic>))
+          .map(
+            (doc) =>
+                Propriedade.fromMap(doc.id, doc.data() as Map<String, dynamic>),
+          )
           .toList();
     } catch (e) {
-      print('Erro ao buscar propriedades: $e');
+      debugPrint('Erro ao buscar propriedades: $e');
       return [];
     }
   }
@@ -60,7 +64,10 @@ class PropriedadeService {
 
       QuerySnapshot snapshot = await query.get();
       List<Propriedade> propriedades = snapshot.docs
-          .map((doc) => Propriedade.fromMap(doc.id, doc.data() as Map<String, dynamic>))
+          .map(
+            (doc) =>
+                Propriedade.fromMap(doc.id, doc.data() as Map<String, dynamic>),
+          )
           .toList();
 
       // Filtro de preço (aplicado localmente)
@@ -82,7 +89,7 @@ class PropriedadeService {
 
       return propriedades;
     } catch (e) {
-      print('Erro ao buscar propriedades com filtros: $e');
+      debugPrint('Erro ao buscar propriedades com filtros: $e');
       return [];
     }
   }
@@ -90,8 +97,9 @@ class PropriedadeService {
   /// Busca localizações únicas
   static Future<List<String>> getLocalizacoesUnicas() async {
     try {
-      QuerySnapshot snapshot =
-          await _firestore.collection('propriedades').get();
+      QuerySnapshot snapshot = await _firestore
+          .collection('propriedades')
+          .get();
 
       Set<String> localizacoes = {};
       for (var doc in snapshot.docs) {
@@ -103,7 +111,7 @@ class PropriedadeService {
 
       return localizacoes.toList()..sort();
     } catch (e) {
-      print('Erro ao buscar localizações: $e');
+      debugPrint('Erro ao buscar localizações: $e');
       return [];
     }
   }
@@ -121,17 +129,17 @@ class PropriedadeService {
       );
 
       if (compressedFile == null) {
-        print('Erro ao comprimir imagem');
+        debugPrint('Erro ao comprimir imagem');
         return null;
       }
 
       // Upload para Firebase Storage
       String timestamp = DateTime.now().millisecondsSinceEpoch.toString();
       String path = 'propriedades/$propertyId/$timestamp.jpg';
-      
+
       Reference ref = _storage.ref().child(path);
       UploadTask uploadTask = ref.putFile(File(compressedFile.path));
-      
+
       TaskSnapshot snapshot = await uploadTask;
       String downloadUrl = await snapshot.ref.getDownloadURL();
 
@@ -139,12 +147,12 @@ class PropriedadeService {
       try {
         await File(compressedFile.path).delete();
       } catch (e) {
-        print('Erro ao deletar arquivo temporário: $e');
+        debugPrint('Erro ao deletar arquivo temporário: $e');
       }
 
       return downloadUrl;
     } catch (e) {
-      print('Erro ao fazer upload da imagem: $e');
+      debugPrint('Erro ao fazer upload da imagem: $e');
       return null;
     }
   }
@@ -156,8 +164,9 @@ class PropriedadeService {
   ) async {
     try {
       // Cria documento no Firestore para obter ID
-      DocumentReference docRef =
-          await _firestore.collection('propriedades').add(propriedade.toMap());
+      DocumentReference docRef = await _firestore
+          .collection('propriedades')
+          .add(propriedade.toMap());
 
       // Se tem imagem, faz upload
       if (imageFile != null) {
@@ -169,7 +178,7 @@ class PropriedadeService {
 
       return true;
     } catch (e) {
-      print('Erro ao adicionar propriedade: $e');
+      debugPrint('Erro ao adicionar propriedade: $e');
       return false;
     }
   }
@@ -189,7 +198,7 @@ class PropriedadeService {
           try {
             await _storage.refFromURL(propriedade.imageUrl).delete();
           } catch (e) {
-            print('Erro ao deletar imagem antiga: $e');
+            debugPrint('Erro ao deletar imagem antiga: $e');
           }
         }
 
@@ -200,10 +209,13 @@ class PropriedadeService {
         }
       }
 
-      await _firestore.collection('propriedades').doc(propriedade.id).update(data);
+      await _firestore
+          .collection('propriedades')
+          .doc(propriedade.id)
+          .update(data);
       return true;
     } catch (e) {
-      print('Erro ao atualizar propriedade: $e');
+      debugPrint('Erro ao atualizar propriedade: $e');
       return false;
     }
   }
@@ -216,7 +228,7 @@ class PropriedadeService {
         try {
           await _storage.refFromURL(imageUrl).delete();
         } catch (e) {
-          print('Erro ao deletar imagem: $e');
+          debugPrint('Erro ao deletar imagem: $e');
         }
       }
 
@@ -224,9 +236,8 @@ class PropriedadeService {
       await _firestore.collection('propriedades').doc(id).delete();
       return true;
     } catch (e) {
-      print('Erro ao deletar propriedade: $e');
+      debugPrint('Erro ao deletar propriedade: $e');
       return false;
     }
   }
 }
-
