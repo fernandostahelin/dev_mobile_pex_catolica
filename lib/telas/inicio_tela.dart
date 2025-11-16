@@ -262,142 +262,163 @@ Gostaria de mais informações.''';
   }
 
   void _mostrarFiltros() {
+    // Local copies of filter values
+    String? tipoTemp = _tipoFiltro;
+    String? statusTemp = _statusFiltro;
+    String ordenacaoTemp = _ordenacao;
+
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      builder: (context) => DraggableScrollableSheet(
-        initialChildSize: 0.6,
-        minChildSize: 0.4,
-        maxChildSize: 0.9,
-        expand: false,
-        builder: (context, scrollController) => Column(
-          children: [
-            Container(
-              margin: const EdgeInsets.symmetric(vertical: 8),
-              width: 40,
-              height: 4,
-              decoration: BoxDecoration(
-                color: Colors.grey[300],
-                borderRadius: BorderRadius.circular(2),
+      builder: (context) => StatefulBuilder(
+        builder: (context, setModalState) => DraggableScrollableSheet(
+          initialChildSize: 0.6,
+          minChildSize: 0.4,
+          maxChildSize: 0.9,
+          expand: false,
+          builder: (context, scrollController) => Column(
+            children: [
+              Container(
+                margin: const EdgeInsets.symmetric(vertical: 8),
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: Colors.grey[300],
+                  borderRadius: BorderRadius.circular(2),
+                ),
               ),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(16),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  const Text(
-                    'Filtros',
-                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                  ),
-                  TextButton(
-                    onPressed: () {
-                      setState(() {
-                        _tipoFiltro = null;
-                        _statusFiltro = null;
-                        _localizacaoFiltro = null;
-                        _ordenacao = 'recente';
-                        _aplicarFiltros();
-                      });
-                      Navigator.pop(context);
-                    },
-                    child: const Text('Limpar'),
-                  ),
-                ],
-              ),
-            ),
-            Expanded(
-              child: ListView(
-                controller: scrollController,
+              Padding(
                 padding: const EdgeInsets.all(16),
-                children: [
-                  // Tipo
-                  const Text('Tipo', style: TextStyle(fontWeight: FontWeight.bold)),
-                  Wrap(
-                    spacing: 8,
-                    children: [
-                      _buildFilterChip('Todos', null, _tipoFiltro, (value) {
-                        setState(() => _tipoFiltro = value);
-                      }),
-                      _buildFilterChip('Casa', 'casa', _tipoFiltro, (value) {
-                        setState(() => _tipoFiltro = value);
-                      }),
-                      _buildFilterChip('Apartamento', 'apartamento', _tipoFiltro, (value) {
-                        setState(() => _tipoFiltro = value);
-                      }),
-                    ],
-                  ),
-                  
-                  const SizedBox(height: 20),
-                  
-                  // Status
-                  const Text('Status', style: TextStyle(fontWeight: FontWeight.bold)),
-                  Wrap(
-                    spacing: 8,
-                    children: [
-                      _buildFilterChip('Todos', null, _statusFiltro, (value) {
-                        setState(() => _statusFiltro = value);
-                      }),
-                      _buildFilterChip('Disponível', 'disponivel', _statusFiltro, (value) {
-                        setState(() => _statusFiltro = value);
-                      }),
-                      _buildFilterChip('Vendido', 'vendido', _statusFiltro, (value) {
-                        setState(() => _statusFiltro = value);
-                      }),
-                      _buildFilterChip('Alugado', 'alugado', _statusFiltro, (value) {
-                        setState(() => _statusFiltro = value);
-                      }),
-                    ],
-                  ),
-                  
-                  const SizedBox(height: 20),
-                  
-                  // Ordenação
-                  const Text('Ordenar por', style: TextStyle(fontWeight: FontWeight.bold)),
-                  RadioListTile<String>(
-                    title: const Text('Mais recente'),
-                    value: 'recente',
-                    groupValue: _ordenacao,
-                    onChanged: (value) {
-                      setState(() => _ordenacao = value!);
-                    },
-                  ),
-                  RadioListTile<String>(
-                    title: const Text('Menor preço'),
-                    value: 'preco_asc',
-                    groupValue: _ordenacao,
-                    onChanged: (value) {
-                      setState(() => _ordenacao = value!);
-                    },
-                  ),
-                  RadioListTile<String>(
-                    title: const Text('Maior preço'),
-                    value: 'preco_desc',
-                    groupValue: _ordenacao,
-                    onChanged: (value) {
-                      setState(() => _ordenacao = value!);
-                    },
-                  ),
-                  
-                  const SizedBox(height: 20),
-                  
-                  ElevatedButton(
-                    onPressed: () {
-                      _aplicarFiltros();
-                      Navigator.pop(context);
-                    },
-                    child: const Text('Aplicar Filtros'),
-                  ),
-                ],
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Text(
+                      'Filtros',
+                      style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                    ),
+                    TextButton(
+                      onPressed: () {
+                        setState(() {
+                          _tipoFiltro = null;
+                          _statusFiltro = null;
+                          _localizacaoFiltro = null;
+                          _ordenacao = 'recente';
+                          _aplicarFiltros();
+                        });
+                        Navigator.pop(context);
+                      },
+                      child: const Text('Limpar'),
+                    ),
+                  ],
+                ),
               ),
-            ),
-          ],
+              Expanded(
+                child: ListView(
+                  controller: scrollController,
+                  padding: const EdgeInsets.all(16),
+                  children: [
+                    // Tipo
+                    const Text('Tipo', style: TextStyle(fontWeight: FontWeight.bold)),
+                    Wrap(
+                      spacing: 8,
+                      children: [
+                        _buildFilterChipLocal('Todos', null, tipoTemp, (value) {
+                          setModalState(() => tipoTemp = value);
+                        }),
+                        _buildFilterChipLocal('Casa', 'casa', tipoTemp, (value) {
+                          setModalState(() => tipoTemp = value);
+                        }),
+                        _buildFilterChipLocal('Apartamento', 'apartamento', tipoTemp, (value) {
+                          setModalState(() => tipoTemp = value);
+                        }),
+                      ],
+                    ),
+                    
+                    const SizedBox(height: 20),
+                    
+                    // Status
+                    const Text('Status', style: TextStyle(fontWeight: FontWeight.bold)),
+                    Wrap(
+                      spacing: 8,
+                      children: [
+                        _buildFilterChipLocal('Todos', null, statusTemp, (value) {
+                          setModalState(() => statusTemp = value);
+                        }),
+                        _buildFilterChipLocal('Disponível', 'disponivel', statusTemp, (value) {
+                          setModalState(() => statusTemp = value);
+                        }),
+                        _buildFilterChipLocal('Vendido', 'vendido', statusTemp, (value) {
+                          setModalState(() => statusTemp = value);
+                        }),
+                        _buildFilterChipLocal('Alugado', 'alugado', statusTemp, (value) {
+                          setModalState(() => statusTemp = value);
+                        }),
+                      ],
+                    ),
+                    
+                    const SizedBox(height: 20),
+                    
+                    // Ordenação
+                    const Text('Ordenar por', style: TextStyle(fontWeight: FontWeight.bold)),
+                    const SizedBox(height: 8),
+                    Wrap(
+                      spacing: 8,
+                      children: [
+                        ChoiceChip(
+                          label: const Text('Mais recente'),
+                          selected: ordenacaoTemp == 'recente',
+                          onSelected: (selected) {
+                            if (selected) {
+                              setModalState(() => ordenacaoTemp = 'recente');
+                            }
+                          },
+                        ),
+                        ChoiceChip(
+                          label: const Text('Menor preço'),
+                          selected: ordenacaoTemp == 'preco_asc',
+                          onSelected: (selected) {
+                            if (selected) {
+                              setModalState(() => ordenacaoTemp = 'preco_asc');
+                            }
+                          },
+                        ),
+                        ChoiceChip(
+                          label: const Text('Maior preço'),
+                          selected: ordenacaoTemp == 'preco_desc',
+                          onSelected: (selected) {
+                            if (selected) {
+                              setModalState(() => ordenacaoTemp = 'preco_desc');
+                            }
+                          },
+                        ),
+                      ],
+                    ),
+                    
+                    const SizedBox(height: 20),
+                    
+                    ElevatedButton(
+                      onPressed: () {
+                        setState(() {
+                          _tipoFiltro = tipoTemp;
+                          _statusFiltro = statusTemp;
+                          _ordenacao = ordenacaoTemp;
+                        });
+                        _aplicarFiltros();
+                        Navigator.pop(context);
+                      },
+                      child: const Text('Aplicar Filtros'),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
   }
 
-  Widget _buildFilterChip(String label, String? value, String? currentValue, ValueChanged<String?> onChanged) {
+  Widget _buildFilterChipLocal(String label, String? value, String? currentValue, ValueChanged<String?> onChanged) {
     bool isSelected = currentValue == value;
     return FilterChip(
       label: Text(label),
@@ -407,6 +428,7 @@ Gostaria de mais informações.''';
       },
     );
   }
+
 
   @override
   Widget build(BuildContext context) {

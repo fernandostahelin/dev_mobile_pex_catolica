@@ -108,9 +108,6 @@ class _CadastroTelaState extends State<CadastroTela> {
       _isLoading = true;
     });
 
-    // Simula um delay de rede
-    await Future.delayed(const Duration(seconds: 1));
-
     try {
       Cliente novoCliente = Cliente(
         nome: _nomeController.text.trim(),
@@ -119,7 +116,7 @@ class _CadastroTelaState extends State<CadastroTela> {
         senha: _senhaController.text,
       );
 
-      bool sucesso = AuthService.cadastrarCliente(novoCliente);
+      bool sucesso = await AuthService.cadastrarCliente(novoCliente);
 
       setState(() {
         _isLoading = false;
@@ -200,58 +197,85 @@ class _CadastroTelaState extends State<CadastroTela> {
     );
   }
 
+  // Método para cadastrar com Google
+  Future<void> _cadastrarComGoogle() async {
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      var cliente = await AuthService.signInWithGoogle();
+
+      setState(() {
+        _isLoading = false;
+      });
+
+      if (cliente != null) {
+        // Login/Cadastro bem-sucedido - navega para área logada
+        if (mounted) {
+          Navigator.pushNamedAndRemoveUntil(
+            context,
+            '/area-cliente-logado',
+            (route) => false,
+          );
+        }
+      } else {
+        // Usuário cancelou ou erro
+        if (mounted) {
+          _mostrarDialogoErro('Não foi possível fazer login com Google');
+        }
+      }
+    } catch (e) {
+      setState(() {
+        _isLoading = false;
+      });
+      _mostrarDialogoErro('Erro ao fazer login com Google. Tente novamente.');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.all(20.0),
+          padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 20.0),
           child: Form(
             key: _formKey,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Placeholder da imagem
-                Center(
-                  child: Container(
-                    width: 200,
-                    height: 120,
-                    decoration: BoxDecoration(
-                      color: Colors.grey[200],
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: const Icon(
-                      Icons.person_add,
-                      size: 60,
-                      color: Colors.grey,
-                    ),
-                  ),
-                ),
-
-                const SizedBox(height: 30),
+                const SizedBox(height: 40),
 
                 // Título
                 const Center(
                   child: Text(
                     'Cadastro',
                     style: TextStyle(
-                      fontSize: 28,
+                      fontSize: 32,
                       fontWeight: FontWeight.bold,
-                      color: Colors.black87,
+                      color: Colors.black,
                     ),
                   ),
                 ),
 
-                const SizedBox(height: 30),
+                const SizedBox(height: 50),
 
                 // Campo Nome
+                const Text(
+                  'Nome',
+                  style: TextStyle(fontSize: 14, color: Colors.grey),
+                ),
+                const SizedBox(height: 8),
                 TextFormField(
                   controller: _nomeController,
                   decoration: const InputDecoration(
-                    labelText: 'Nome',
                     hintText: 'Insira seu nome',
+                    hintStyle: TextStyle(color: Colors.grey),
                     border: OutlineInputBorder(),
-                    prefixIcon: Icon(Icons.person),
+                    contentPadding: EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 14,
+                    ),
                   ),
                   validator: (value) {
                     if (value == null || value.trim().isEmpty) {
@@ -261,24 +285,37 @@ class _CadastroTelaState extends State<CadastroTela> {
                   },
                 ),
 
-                const SizedBox(height: 16),
+                const SizedBox(height: 20),
 
                 // Campo Email
+                const Text(
+                  'Email',
+                  style: TextStyle(fontSize: 14, color: Colors.grey),
+                ),
+                const SizedBox(height: 8),
                 TextFormField(
                   controller: _emailController,
                   keyboardType: TextInputType.emailAddress,
                   decoration: const InputDecoration(
-                    labelText: 'Email',
                     hintText: 'Insira seu email',
+                    hintStyle: TextStyle(color: Colors.grey),
                     border: OutlineInputBorder(),
-                    prefixIcon: Icon(Icons.email),
+                    contentPadding: EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 14,
+                    ),
                   ),
                   validator: _validarEmail,
                 ),
 
-                const SizedBox(height: 16),
+                const SizedBox(height: 20),
 
                 // Campo Telefone
+                const Text(
+                  'Telefone',
+                  style: TextStyle(fontSize: 14, color: Colors.grey),
+                ),
+                const SizedBox(height: 8),
                 TextFormField(
                   controller: _telefoneController,
                   keyboardType: TextInputType.phone,
@@ -288,28 +325,42 @@ class _CadastroTelaState extends State<CadastroTela> {
                   ],
                   onChanged: _formatarTelefone,
                   decoration: const InputDecoration(
-                    labelText: 'Telefone',
-                    hintText: '(47) 912345678',
+                    hintText: '(047) 912345678',
+                    hintStyle: TextStyle(color: Colors.grey),
                     border: OutlineInputBorder(),
-                    prefixIcon: Icon(Icons.phone),
+                    contentPadding: EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 14,
+                    ),
                   ),
                   validator: _validarTelefone,
                 ),
 
-                const SizedBox(height: 16),
+                const SizedBox(height: 20),
 
                 // Campo Senha
+                const Text(
+                  'Senha',
+                  style: TextStyle(fontSize: 14, color: Colors.grey),
+                ),
+                const SizedBox(height: 8),
                 TextFormField(
                   controller: _senhaController,
                   obscureText: !_senhaVisivel,
                   decoration: InputDecoration(
-                    labelText: 'Senha',
                     hintText: 'Senha',
+                    hintStyle: const TextStyle(color: Colors.grey),
                     border: const OutlineInputBorder(),
-                    prefixIcon: const Icon(Icons.lock),
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 14,
+                    ),
                     suffixIcon: IconButton(
                       icon: Icon(
-                        _senhaVisivel ? Icons.visibility : Icons.visibility_off,
+                        _senhaVisivel
+                            ? Icons.visibility_outlined
+                            : Icons.visibility_off_outlined,
+                        color: Colors.grey,
                       ),
                       onPressed: () {
                         setState(() {
@@ -321,22 +372,31 @@ class _CadastroTelaState extends State<CadastroTela> {
                   validator: _validarSenha,
                 ),
 
-                const SizedBox(height: 16),
+                const SizedBox(height: 20),
 
                 // Campo Confirme a Senha
+                const Text(
+                  'Confirme a senha',
+                  style: TextStyle(fontSize: 14, color: Colors.grey),
+                ),
+                const SizedBox(height: 8),
                 TextFormField(
                   controller: _confirmarSenhaController,
                   obscureText: !_confirmarSenhaVisivel,
                   decoration: InputDecoration(
-                    labelText: 'Confirme a senha',
                     hintText: 'Confirme a senha',
+                    hintStyle: const TextStyle(color: Colors.grey),
                     border: const OutlineInputBorder(),
-                    prefixIcon: const Icon(Icons.lock),
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 14,
+                    ),
                     suffixIcon: IconButton(
                       icon: Icon(
                         _confirmarSenhaVisivel
-                            ? Icons.visibility
-                            : Icons.visibility_off,
+                            ? Icons.visibility_outlined
+                            : Icons.visibility_off_outlined,
+                        color: Colors.grey,
                       ),
                       onPressed: () {
                         setState(() {
@@ -348,17 +408,17 @@ class _CadastroTelaState extends State<CadastroTela> {
                   validator: _validarConfirmarSenha,
                 ),
 
-                const SizedBox(height: 30),
+                const SizedBox(height: 50),
 
                 // Botão Cadastrar
                 SizedBox(
                   width: double.infinity,
-                  height: 50,
-                  child: ElevatedButton(
+                  height: 54,
+                  child: OutlinedButton(
                     onPressed: _isLoading ? null : _cadastrarCliente,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.indigo,
-                      foregroundColor: Colors.white,
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: Colors.black,
+                      side: const BorderSide(color: Colors.black, width: 1.5),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(8),
                       ),
@@ -370,7 +430,7 @@ class _CadastroTelaState extends State<CadastroTela> {
                             child: CircularProgressIndicator(
                               strokeWidth: 2,
                               valueColor: AlwaysStoppedAnimation<Color>(
-                                Colors.white,
+                                Colors.black,
                               ),
                             ),
                           )
@@ -383,6 +443,58 @@ class _CadastroTelaState extends State<CadastroTela> {
                           ),
                   ),
                 ),
+
+                const SizedBox(height: 20),
+
+                // Divider com "ou"
+                Row(
+                  children: [
+                    Expanded(child: Divider(color: Colors.grey[400])),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      child: Text(
+                        'ou',
+                        style: TextStyle(color: Colors.grey[600]),
+                      ),
+                    ),
+                    Expanded(child: Divider(color: Colors.grey[400])),
+                  ],
+                ),
+
+                const SizedBox(height: 20),
+
+                // Botão Google Sign-In
+                SizedBox(
+                  width: double.infinity,
+                  height: 54,
+                  child: OutlinedButton.icon(
+                    onPressed: _isLoading ? null : _cadastrarComGoogle,
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: Colors.black,
+                      side: BorderSide(color: Colors.grey[300]!, width: 1),
+                      backgroundColor: Colors.white,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
+                    icon: Image.network(
+                      'https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg',
+                      height: 24,
+                      width: 24,
+                      errorBuilder: (context, error, stackTrace) =>
+                          const Icon(Icons.g_mobiledata, size: 24),
+                    ),
+                    label: const Text(
+                      'Continuar com Google',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ),
+                ),
+
+                const SizedBox(height: 20),
               ],
             ),
           ),
