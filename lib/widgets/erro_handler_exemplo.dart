@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import 'erro_widget.dart';
 
 /// EXEMPLO 1: Usando try-catch em uma função assíncrona
-/// 
+///
 /// Você pode usar o ErroBox para exibir erros específicos em uma parte da tela
 class ExemploTryCatch extends StatefulWidget {
   const ExemploTryCatch({super.key});
@@ -34,7 +34,7 @@ class _ExemploTryCatchState extends State<ExemploTryCatch> {
     try {
       // Seu código que pode gerar erro
       // Por exemplo: await FirebaseFirestore.instance.collection('...').get();
-      
+
       setState(() {
         _carregando = false;
       });
@@ -66,7 +66,7 @@ class _ExemploTryCatchState extends State<ExemploTryCatch> {
 }
 
 /// EXEMPLO 2: Usando FutureBuilder com tratamento de erro
-/// 
+///
 /// O FutureBuilder já lida com erros automaticamente
 class ExemploFutureBuilder extends StatelessWidget {
   const ExemploFutureBuilder({super.key});
@@ -101,7 +101,7 @@ class ExemploFutureBuilder extends StatelessWidget {
 }
 
 /// EXEMPLO 3: Usando em um botão com ação
-/// 
+///
 /// Quando uma ação pode falhar, mostre o erro em um dialog
 class ExemploAcaoComErro extends StatelessWidget {
   const ExemploAcaoComErro({super.key});
@@ -110,7 +110,7 @@ class ExemploAcaoComErro extends StatelessWidget {
     try {
       // Sua ação que pode falhar
       // Por exemplo: await FirebaseAuth.instance.signInWithEmailAndPassword(...);
-      
+
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Ação executada com sucesso!')),
@@ -146,4 +146,3 @@ class ExemploAcaoComErro extends StatelessWidget {
     );
   }
 }
-

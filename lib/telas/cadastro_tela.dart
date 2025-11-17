@@ -111,7 +111,9 @@ class _CadastroTelaState extends State<CadastroTela> {
         senha: _senhaController.text,
       );
 
-      Map<String, dynamic> resultado = await AuthService.cadastrarCliente(novoCliente);
+      Map<String, dynamic> resultado = await AuthService.cadastrarCliente(
+        novoCliente,
+      );
 
       setState(() {
         _isLoading = false;
@@ -497,6 +499,7 @@ class _CadastroTelaState extends State<CadastroTela> {
       ),
       bottomNavigationBar: BottomNavigationBar(
         type: BottomNavigationBarType.fixed,
+        currentIndex: 1,
         items: const [
           BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Início'),
           BottomNavigationBarItem(

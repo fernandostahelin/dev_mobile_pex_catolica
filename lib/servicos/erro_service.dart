@@ -7,21 +7,16 @@ class ErroService {
   static const String emailDestino = 'fernandostahelin@gmail.com';
 
   /// Reporta um erro enviando um email com os detalhes
-  static Future<void> reportarErro(
-    Object erro,
-    StackTrace? stackTrace,
-  ) async {
+  static Future<void> reportarErro(Object erro, StackTrace? stackTrace) async {
     try {
       // Coleta informações do dispositivo
       final deviceInfo = await _getDeviceInfo();
-      
+
       // Constrói o corpo do email
       final String assunto = Uri.encodeComponent('Erro no App PEX');
-      final String corpo = Uri.encodeComponent(_construirCorpoEmail(
-        erro,
-        stackTrace,
-        deviceInfo,
-      ));
+      final String corpo = Uri.encodeComponent(
+        _construirCorpoEmail(erro, stackTrace, deviceInfo),
+      );
 
       // Constrói a URL do mailto
       final Uri emailUri = Uri.parse(
@@ -126,4 +121,3 @@ class ErroService {
     }
   }
 }
-

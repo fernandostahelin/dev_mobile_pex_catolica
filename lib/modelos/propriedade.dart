@@ -6,7 +6,8 @@ class Propriedade {
   final String nome;
   final String localizacao;
   final double preco;
-  final String imageUrl;
+  final String imageUrl; // Deprecated - keeping for backward compatibility
+  final String? imageBase64; // New field for base64 image storage
   final String status; // 'disponivel', 'vendido', 'alugado'
   final String tipo; // 'casa' or 'apartamento'
   final DateTime dataAdicionada;
@@ -17,6 +18,7 @@ class Propriedade {
     required this.localizacao,
     required this.preco,
     required this.imageUrl,
+    this.imageBase64,
     required this.status,
     required this.tipo,
     required this.dataAdicionada,
@@ -69,6 +71,7 @@ class Propriedade {
       'localizacao': localizacao,
       'preco': preco,
       'imageUrl': imageUrl,
+      'imageBase64': imageBase64,
       'status': status,
       'tipo': tipo,
       'dataAdicionada': Timestamp.fromDate(dataAdicionada),
@@ -83,6 +86,7 @@ class Propriedade {
       localizacao: map['localizacao'] ?? '',
       preco: (map['preco'] ?? 0).toDouble(),
       imageUrl: map['imageUrl'] ?? '',
+      imageBase64: map['imageBase64'],
       status: map['status'] ?? 'disponivel',
       tipo: map['tipo'] ?? 'casa',
       dataAdicionada:
@@ -97,6 +101,7 @@ class Propriedade {
     String? localizacao,
     double? preco,
     String? imageUrl,
+    String? imageBase64,
     String? status,
     String? tipo,
     DateTime? dataAdicionada,
@@ -107,6 +112,7 @@ class Propriedade {
       localizacao: localizacao ?? this.localizacao,
       preco: preco ?? this.preco,
       imageUrl: imageUrl ?? this.imageUrl,
+      imageBase64: imageBase64 ?? this.imageBase64,
       status: status ?? this.status,
       tipo: tipo ?? this.tipo,
       dataAdicionada: dataAdicionada ?? this.dataAdicionada,

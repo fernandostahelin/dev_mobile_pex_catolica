@@ -101,24 +101,20 @@ class _AreaClienteSemLoginState extends State<AreaClienteSemLogin> {
               SizedBox(
                 width: double.infinity,
                 height: 50,
-                child: OutlinedButton(
+                child: ElevatedButton(
                   onPressed: () {
                     Navigator.pushNamed(context, '/login');
                   },
-                  style: OutlinedButton.styleFrom(
-                    side: const BorderSide(color: Colors.indigo, width: 1),
-                    backgroundColor: Colors.indigo[50],
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Theme.of(context).colorScheme.primary,
+                    foregroundColor: Colors.white,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(8),
                     ),
                   ),
                   child: const Text(
                     'Já sou cliente',
-                    style: TextStyle(
-                      fontSize: 16,
-                      color: Colors.indigo,
-                      fontWeight: FontWeight.w500,
-                    ),
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
                   ),
                 ),
               ),

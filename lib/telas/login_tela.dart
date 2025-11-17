@@ -237,7 +237,7 @@ class _LoginTelaState extends State<LoginTela> {
                   child: ElevatedButton(
                     onPressed: _isLoading ? null : _fazerLogin,
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.indigo,
+                      backgroundColor: Theme.of(context).colorScheme.primary,
                       foregroundColor: Colors.white,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(8),
@@ -322,6 +322,7 @@ class _LoginTelaState extends State<LoginTela> {
       ),
       bottomNavigationBar: BottomNavigationBar(
         type: BottomNavigationBarType.fixed,
+        currentIndex: 1,
         items: const [
           BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Início'),
           BottomNavigationBarItem(

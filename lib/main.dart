@@ -11,6 +11,7 @@ import 'telas/informacoes_tela.dart';
 import 'telas/documentos_tela.dart';
 import 'telas/admin_panel_tela.dart';
 import 'telas/adicionar_propriedade_tela.dart';
+import 'telas/admin_documentos_tela.dart';
 import 'modelos/propriedade.dart';
 import 'widgets/erro_widget.dart';
 import 'servicos/erro_service.dart';
@@ -23,7 +24,7 @@ void main() async {
   FlutterError.onError = (FlutterErrorDetails details) {
     // Log do erro em modo debug
     ErroService.logErro(details.exception, details.stack);
-    
+
     // Apresenta o erro customizado ao usuário
     FlutterError.presentError(details);
   };
@@ -59,7 +60,12 @@ class PexApp extends StatelessWidget {
     return MaterialApp(
       title: 'PEX - Área do Cliente',
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.indigo),
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: const Color(0xFFa29890),
+          primary: const Color(0xFFa29890),
+          secondary: Colors.white,
+          tertiary: const Color(0xFFb0aaa2),
+        ),
         useMaterial3: true,
         appBarTheme: const AppBarTheme(centerTitle: true, elevation: 0),
         inputDecorationTheme: InputDecorationTheme(
@@ -97,6 +103,7 @@ class PexApp extends StatelessWidget {
         '/documentos': (context) => const DocumentosTela(),
         '/admin-panel': (context) => const AdminPanelTela(),
         '/adicionar-propriedade': (context) => const AdicionarPropriedadeTela(),
+        '/admin-documentos': (context) => const AdminDocumentosTela(),
       },
       onGenerateRoute: (settings) {
         if (settings.name == '/editar-propriedade') {

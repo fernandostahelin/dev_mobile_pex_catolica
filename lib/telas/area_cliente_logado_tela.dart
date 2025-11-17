@@ -26,7 +26,7 @@ class AreaClienteLogadoTela extends StatelessWidget {
                       Navigator.pushNamed(context, '/informacoes');
                     },
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.purple.shade100,
+                      backgroundColor: Theme.of(context).colorScheme.primary,
                       foregroundColor: Colors.black,
                       padding: const EdgeInsets.symmetric(vertical: 20),
                       shape: RoundedRectangleBorder(
@@ -50,7 +50,7 @@ class AreaClienteLogadoTela extends StatelessWidget {
                       Navigator.pushNamed(context, '/documentos');
                     },
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.purple.shade100,
+                      backgroundColor: Theme.of(context).colorScheme.primary,
                       foregroundColor: Colors.black,
                       padding: const EdgeInsets.symmetric(vertical: 20),
                       shape: RoundedRectangleBorder(
@@ -141,9 +141,8 @@ class AreaClienteLogadoTela extends StatelessWidget {
         onTap: (index) {
           if (index == 0) {
             Navigator.pushNamed(context, '/inicio');
-          } else if (index == 1) {
-            Navigator.pushNamed(context, '/area-cliente-logado');
           }
+          // index == 1 não faz nada, pois já estamos na Área do Cliente
         },
         currentIndex: 1,
       ),

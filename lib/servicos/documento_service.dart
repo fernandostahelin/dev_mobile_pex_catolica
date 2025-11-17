@@ -103,6 +103,7 @@ class DocumentoService {
     googleDriveUrl, // URL do Google Drive (pode ser link de compartilhamento ou download direto)
     required String clientEmail,
     required int fileSize,
+    TipoDocumento fileType = TipoDocumento.pdf,
   }) async {
     try {
       // Converte para URL de download direto se necessário
@@ -114,6 +115,7 @@ class DocumentoService {
         'uploadDate': FieldValue.serverTimestamp(),
         'clientEmail': clientEmail,
         'fileSize': fileSize,
+        'fileType': fileType.name,
       });
       return true;
     } catch (e) {
@@ -130,6 +132,33 @@ class DocumentoService {
     } catch (e) {
       debugPrint('Erro ao deletar documento: $e');
       return false;
+    }
+  }
+
+  /// Busca todos os documentos (para admin)
+  static Future<List<Documento>> getAllDocumentos() async {
+    try {
+      debugPrint('Buscando todos os documentos (admin)');
+
+      QuerySnapshot snapshot = await _firestore
+          .collection('documentos')
+          .orderBy('uploadDate', descending: true)
+          .get();
+
+      debugPrint('Snapshot recebido com ${snapshot.docs.length} documentos');
+
+      List<Documento> documentos = snapshot.docs
+          .map(
+            (doc) =>
+                Documento.fromMap(doc.id, doc.data() as Map<String, dynamic>),
+          )
+          .toList();
+
+      return documentos;
+    } catch (e) {
+      debugPrint('Erro ao buscar todos os documentos: $e');
+      debugPrint('Stack trace: ${StackTrace.current}');
+      return [];
     }
   }
 }

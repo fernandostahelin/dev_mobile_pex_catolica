@@ -4,10 +4,7 @@ import '../servicos/erro_service.dart';
 class ErroWidget extends StatelessWidget {
   final FlutterErrorDetails errorDetails;
 
-  const ErroWidget({
-    super.key,
-    required this.errorDetails,
-  });
+  const ErroWidget({super.key, required this.errorDetails});
 
   @override
   Widget build(BuildContext context) {
@@ -40,7 +37,7 @@ class ErroWidget extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 24),
-                  
+
                   // Mensagem de erro
                   const Text(
                     'Um erro ocorreu',
@@ -52,17 +49,14 @@ class ErroWidget extends StatelessWidget {
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 12),
-                  
+
                   const Text(
                     'Desculpe, algo deu errado. Por favor, tente novamente mais tarde.',
-                    style: TextStyle(
-                      fontSize: 16,
-                      color: Colors.black54,
-                    ),
+                    style: TextStyle(fontSize: 16, color: Colors.black54),
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 32),
-                  
+
                   // Botões
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -74,7 +68,7 @@ class ErroWidget extends StatelessWidget {
                             errorDetails.exception,
                             errorDetails.stack,
                           );
-                          
+
                           if (context.mounted) {
                             ScaffoldMessenger.of(context).showSnackBar(
                               const SnackBar(
@@ -135,11 +129,7 @@ class ErroBox extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(
-            Icons.error_outline,
-            size: 48,
-            color: Colors.red.shade400,
-          ),
+          Icon(Icons.error_outline, size: 48, color: Colors.red.shade400),
           const SizedBox(height: 16),
           Text(
             mensagem ?? 'Um erro ocorreu',
@@ -153,17 +143,14 @@ class ErroBox extends StatelessWidget {
           const SizedBox(height: 8),
           const Text(
             'Por favor, tente novamente.',
-            style: TextStyle(
-              fontSize: 14,
-              color: Colors.black54,
-            ),
+            style: TextStyle(fontSize: 14, color: Colors.black54),
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 16),
           ElevatedButton.icon(
             onPressed: () async {
               await ErroService.reportarErro(error, stackTrace);
-              
+
               if (context.mounted) {
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(
@@ -187,4 +174,3 @@ class ErroBox extends StatelessWidget {
     );
   }
 }
-

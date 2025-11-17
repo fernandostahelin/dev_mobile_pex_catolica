@@ -1,9 +1,54 @@
 import 'dart:io';
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:intl/intl.dart';
 import '../modelos/propriedade.dart';
 import '../servicos/propriedade_service.dart';
+
+class CurrencyInputFormatter extends TextInputFormatter {
+  final NumberFormat _formatter = NumberFormat.currency(
+    locale: 'pt_BR',
+    symbol: 'R\$',
+    decimalDigits: 2,
+  );
+
+  @override
+  TextEditingValue formatEditUpdate(
+    TextEditingValue oldValue,
+    TextEditingValue newValue,
+  ) {
+    if (newValue.text.isEmpty) {
+      return newValue.copyWith(text: '');
+    }
+
+    // Remove tudo que não é número
+    String numericString = newValue.text.replaceAll(RegExp(r'[^0-9]'), '');
+
+    if (numericString.isEmpty) {
+      return newValue.copyWith(text: '');
+    }
+
+    // Converte para double (em centavos)
+    double value = double.parse(numericString) / 100;
+
+    // Formata como moeda
+    String formatted = _formatter.format(value);
+
+    return TextEditingValue(
+      text: formatted,
+      selection: TextSelection.collapsed(offset: formatted.length),
+    );
+  }
+
+  static double? parse(String text) {
+    if (text.isEmpty) return null;
+    String numericString = text.replaceAll(RegExp(r'[^0-9]'), '');
+    if (numericString.isEmpty) return null;
+    return double.parse(numericString) / 100;
+  }
+}
 
 class AdicionarPropriedadeTela extends StatefulWidget {
   final Propriedade? propriedade;
@@ -34,7 +79,15 @@ class _AdicionarPropriedadeTelaState extends State<AdicionarPropriedadeTela> {
       _isEditing = true;
       _nomeController.text = widget.propriedade!.nome;
       _localizacaoController.text = widget.propriedade!.localizacao;
-      _precoController.text = widget.propriedade!.preco.toStringAsFixed(2);
+
+      // Formata o preço com a máscara de moeda
+      final formatter = NumberFormat.currency(
+        locale: 'pt_BR',
+        symbol: 'R\$',
+        decimalDigits: 2,
+      );
+      _precoController.text = formatter.format(widget.propriedade!.preco);
+
       _tipo = widget.propriedade!.tipo;
       _status = widget.propriedade!.status;
     }
@@ -102,7 +155,17 @@ class _AdicionarPropriedadeTelaState extends State<AdicionarPropriedadeTela> {
     });
 
     try {
-      double preco = double.parse(_precoController.text.replaceAll(',', '.'));
+      double? preco = CurrencyInputFormatter.parse(_precoController.text);
+
+      if (preco == null || preco <= 0) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('Preço inválido')));
+        setState(() {
+          _isLoading = false;
+        });
+        return;
+      }
 
       Propriedade propriedade = Propriedade(
         id: _isEditing ? widget.propriedade!.id : '',
@@ -167,6 +230,37 @@ class _AdicionarPropriedadeTelaState extends State<AdicionarPropriedadeTela> {
     }
   }
 
+  Widget? _buildExistingImage() {
+    if (widget.propriedade == null) return null;
+
+    // Tenta usar base64 primeiro
+    if (widget.propriedade!.imageBase64 != null &&
+        widget.propriedade!.imageBase64!.isNotEmpty) {
+      try {
+        final bytes = base64Decode(widget.propriedade!.imageBase64!);
+        return Image.memory(Uint8List.fromList(bytes), fit: BoxFit.cover);
+      } catch (e) {
+        debugPrint('Erro ao decodificar base64: $e');
+      }
+    }
+
+    // Fallback para URL antiga (compatibilidade)
+    if (widget.propriedade!.imageUrl.isNotEmpty) {
+      return Image.network(
+        widget.propriedade!.imageUrl,
+        fit: BoxFit.cover,
+        errorBuilder: (context, error, stackTrace) {
+          return Container(
+            color: Colors.grey[300],
+            child: const Icon(Icons.error),
+          );
+        },
+      );
+    }
+
+    return null;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -174,7 +268,8 @@ class _AdicionarPropriedadeTelaState extends State<AdicionarPropriedadeTela> {
         title: Text(
           _isEditing ? 'Editar Propriedade' : 'Adicionar Propriedade',
         ),
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+        backgroundColor: Theme.of(context).colorScheme.primary,
+        foregroundColor: Colors.white,
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(20),
@@ -200,13 +295,10 @@ class _AdicionarPropriedadeTelaState extends State<AdicionarPropriedadeTela> {
                             borderRadius: BorderRadius.circular(12),
                             child: Image.file(_imageFile!, fit: BoxFit.cover),
                           )
-                        : _isEditing && widget.propriedade!.imageUrl.isNotEmpty
+                        : _isEditing && _buildExistingImage() != null
                         ? ClipRRect(
                             borderRadius: BorderRadius.circular(12),
-                            child: Image.network(
-                              widget.propriedade!.imageUrl,
-                              fit: BoxFit.cover,
-                            ),
+                            child: _buildExistingImage()!,
                           )
                         : Column(
                             mainAxisAlignment: MainAxisAlignment.center,
@@ -269,23 +361,19 @@ class _AdicionarPropriedadeTelaState extends State<AdicionarPropriedadeTela> {
               TextFormField(
                 controller: _precoController,
                 decoration: const InputDecoration(
-                  labelText: 'Preço (R\$)',
+                  labelText: 'Preço',
                   border: OutlineInputBorder(),
                   prefixIcon: Icon(Icons.attach_money),
+                  hintText: 'R\$ 0,00',
                 ),
-                keyboardType: const TextInputType.numberWithOptions(
-                  decimal: true,
-                ),
-                inputFormatters: [
-                  FilteringTextInputFormatter.allow(RegExp(r'[0-9.,]')),
-                ],
+                keyboardType: TextInputType.number,
+                inputFormatters: [CurrencyInputFormatter()],
                 validator: (value) {
                   if (value == null || value.trim().isEmpty) {
                     return 'Preço é obrigatório';
                   }
-                  try {
-                    double.parse(value.replaceAll(',', '.'));
-                  } catch (e) {
+                  double? preco = CurrencyInputFormatter.parse(value);
+                  if (preco == null || preco <= 0) {
                     return 'Preço inválido';
                   }
                   return null;
@@ -386,7 +474,7 @@ class _AdicionarPropriedadeTelaState extends State<AdicionarPropriedadeTela> {
                     child: ElevatedButton(
                       onPressed: _isLoading ? null : _salvarPropriedade,
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.indigo,
+                        backgroundColor: Theme.of(context).colorScheme.primary,
                         foregroundColor: Colors.white,
                       ),
                       child: _isLoading

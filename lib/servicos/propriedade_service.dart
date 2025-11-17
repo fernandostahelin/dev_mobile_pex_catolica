@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:convert';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
@@ -116,7 +117,31 @@ class PropriedadeService {
     }
   }
 
-  /// Comprime e faz upload de imagem
+  /// Comprime e converte imagem para base64
+  static Future<String?> compressAndConvertToBase64(File imageFile) async {
+    try {
+      // Lê os bytes da imagem
+      final bytes = await imageFile.readAsBytes();
+
+      // Comprime e redimensiona a imagem
+      final compressedBytes = await FlutterImageCompress.compressWithList(
+        bytes,
+        minWidth: 800,
+        minHeight: 800,
+        quality: 70,
+      );
+
+      // Converte para base64
+      final base64String = base64Encode(compressedBytes);
+
+      return base64String;
+    } catch (e) {
+      debugPrint('Erro ao comprimir e converter imagem: $e');
+      return null;
+    }
+  }
+
+  /// Deprecated - kept for backward compatibility
   static Future<String?> uploadImagem(File imageFile, String propertyId) async {
     try {
       // Comprime a imagem
@@ -163,18 +188,26 @@ class PropriedadeService {
     File? imageFile,
   ) async {
     try {
-      // Cria documento no Firestore para obter ID
-      DocumentReference docRef = await _firestore
-          .collection('propriedades')
-          .add(propriedade.toMap());
-
-      // Se tem imagem, faz upload
+      // Se tem imagem, converte para base64
+      String? imageBase64;
       if (imageFile != null) {
-        String? imageUrl = await uploadImagem(imageFile, docRef.id);
-        if (imageUrl != null) {
-          await docRef.update({'imageUrl': imageUrl});
+        imageBase64 = await compressAndConvertToBase64(imageFile);
+        if (imageBase64 == null) {
+          debugPrint('Erro ao processar imagem');
+          return false;
         }
       }
+
+      // Cria propriedade com imagem base64
+      final propriedadeComImagem = propriedade.copyWith(
+        imageBase64: imageBase64,
+        imageUrl: '', // Deixa vazio, não usamos mais Firebase Storage
+      );
+
+      // Adiciona ao Firestore
+      await _firestore
+          .collection('propriedades')
+          .add(propriedadeComImagem.toMap());
 
       return true;
     } catch (e) {
@@ -189,30 +222,23 @@ class PropriedadeService {
     File? newImageFile,
   ) async {
     try {
-      Map<String, dynamic> data = propriedade.toMap();
+      Propriedade propriedadeAtualizada = propriedade;
 
-      // Se tem nova imagem
+      // Se tem nova imagem, converte para base64
       if (newImageFile != null) {
-        // Deleta imagem antiga se existir
-        if (propriedade.imageUrl.isNotEmpty) {
-          try {
-            await _storage.refFromURL(propriedade.imageUrl).delete();
-          } catch (e) {
-            debugPrint('Erro ao deletar imagem antiga: $e');
-          }
-        }
-
-        // Upload nova imagem
-        String? imageUrl = await uploadImagem(newImageFile, propriedade.id);
-        if (imageUrl != null) {
-          data['imageUrl'] = imageUrl;
+        String? imageBase64 = await compressAndConvertToBase64(newImageFile);
+        if (imageBase64 != null) {
+          propriedadeAtualizada = propriedade.copyWith(
+            imageBase64: imageBase64,
+            imageUrl: '', // Limpa a URL antiga
+          );
         }
       }
 
       await _firestore
           .collection('propriedades')
           .doc(propriedade.id)
-          .update(data);
+          .update(propriedadeAtualizada.toMap());
       return true;
     } catch (e) {
       debugPrint('Erro ao atualizar propriedade: $e');
@@ -223,16 +249,16 @@ class PropriedadeService {
   /// Deleta propriedade
   static Future<bool> deletarPropriedade(String id, String imageUrl) async {
     try {
-      // Deleta imagem do Storage
-      if (imageUrl.isNotEmpty) {
+      // Se a propriedade antiga usa Firebase Storage, tenta deletar a imagem
+      if (imageUrl.isNotEmpty && imageUrl.startsWith('http')) {
         try {
           await _storage.refFromURL(imageUrl).delete();
         } catch (e) {
-          debugPrint('Erro ao deletar imagem: $e');
+          debugPrint('Erro ao deletar imagem do storage (ignorado): $e');
         }
       }
 
-      // Deleta documento do Firestore
+      // Deleta documento do Firestore (imagens base64 são deletadas automaticamente)
       await _firestore.collection('propriedades').doc(id).delete();
       return true;
     } catch (e) {

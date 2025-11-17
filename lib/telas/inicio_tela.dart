@@ -1,3 +1,5 @@
+import 'dart:convert';
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -102,21 +104,11 @@ class _InicioTelaState extends State<InicioTela> {
           mainAxisSize: MainAxisSize.min,
           children: [
             // Imagem
-            CachedNetworkImage(
-              imageUrl: propriedade.imageUrl,
+            _buildPropertyImage(
+              propriedade,
               height: 300,
               width: double.infinity,
               fit: BoxFit.cover,
-              placeholder: (context, url) => Container(
-                height: 300,
-                color: Colors.grey[300],
-                child: const Center(child: CircularProgressIndicator()),
-              ),
-              errorWidget: (context, url, error) => Container(
-                height: 300,
-                color: Colors.grey[300],
-                child: const Icon(Icons.home, size: 80, color: Colors.grey),
-              ),
             ),
 
             Padding(
@@ -457,6 +449,10 @@ Gostaria de mais informações.''';
                         _aplicarFiltros();
                         Navigator.pop(context);
                       },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.green,
+                        foregroundColor: Colors.white,
+                      ),
                       child: const Text('Aplicar Filtros'),
                     ),
                   ],
@@ -482,6 +478,67 @@ Gostaria de mais informações.''';
       onSelected: (selected) {
         onChanged(selected ? value : null);
       },
+    );
+  }
+
+  Widget _buildPropertyImage(
+    Propriedade propriedade, {
+    double? height,
+    double? width,
+    BoxFit? fit,
+  }) {
+    // Se tem imagem base64, usa ela
+    if (propriedade.imageBase64 != null &&
+        propriedade.imageBase64!.isNotEmpty) {
+      try {
+        final bytes = base64Decode(propriedade.imageBase64!);
+        return Image.memory(
+          Uint8List.fromList(bytes),
+          height: height,
+          width: width,
+          fit: fit ?? BoxFit.cover,
+          errorBuilder: (context, error, stackTrace) {
+            return Container(
+              height: height,
+              width: width,
+              color: Colors.grey[300],
+              child: const Icon(Icons.home, size: 40, color: Colors.grey),
+            );
+          },
+        );
+      } catch (e) {
+        debugPrint('Erro ao decodificar base64: $e');
+      }
+    }
+
+    // Fallback para URL antiga (compatibilidade)
+    if (propriedade.imageUrl.isNotEmpty) {
+      return CachedNetworkImage(
+        imageUrl: propriedade.imageUrl,
+        height: height,
+        width: width,
+        fit: fit ?? BoxFit.cover,
+        placeholder: (context, url) => Container(
+          height: height,
+          width: width,
+          color: Colors.grey[300],
+          child: const Center(child: CircularProgressIndicator()),
+        ),
+        errorWidget: (context, url, error) => Container(
+          height: height,
+          width: width,
+          color: Colors.grey[300],
+          child: const Icon(Icons.home, size: 40, color: Colors.grey),
+        ),
+      );
+    }
+
+    // Sem imagem
+    return Container(
+      height: height,
+      width: width,
+      color: Colors.grey[300],
+      child: const Icon(Icons.home, size: 40, color: Colors.grey),
     );
   }
 
@@ -584,7 +641,7 @@ Gostaria de mais informações.''';
                   '/admin-panel',
                 ).then((_) => _carregarDados());
               },
-              child: const Icon(Icons.add),
+              child: const Icon(Icons.business),
             )
           : null,
       bottomNavigationBar: BottomNavigationBar(
@@ -626,22 +683,7 @@ Gostaria de mais informações.''';
               child: Stack(
                 fit: StackFit.expand,
                 children: [
-                  CachedNetworkImage(
-                    imageUrl: propriedade.imageUrl,
-                    fit: BoxFit.cover,
-                    placeholder: (context, url) => Container(
-                      color: Colors.grey[300],
-                      child: const Center(child: CircularProgressIndicator()),
-                    ),
-                    errorWidget: (context, url, error) => Container(
-                      color: Colors.grey[300],
-                      child: const Icon(
-                        Icons.home,
-                        size: 40,
-                        color: Colors.grey,
-                      ),
-                    ),
-                  ),
+                  _buildPropertyImage(propriedade, fit: BoxFit.cover),
                   // Badge de status
                   Positioned(
                     top: 8,

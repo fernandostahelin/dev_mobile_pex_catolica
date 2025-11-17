@@ -1,3 +1,5 @@
+import 'dart:convert';
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../modelos/propriedade.dart';
@@ -104,12 +106,82 @@ class _AdminPanelTelaState extends State<AdminPanelTela> {
     }
   }
 
+  Widget _buildPropertyImage(
+    Propriedade propriedade, {
+    double? width,
+    double? height,
+  }) {
+    // Se tem imagem base64, usa ela
+    if (propriedade.imageBase64 != null &&
+        propriedade.imageBase64!.isNotEmpty) {
+      try {
+        final bytes = base64Decode(propriedade.imageBase64!);
+        return Image.memory(
+          Uint8List.fromList(bytes),
+          width: width ?? 80,
+          height: height ?? 80,
+          fit: BoxFit.cover,
+          errorBuilder: (context, error, stackTrace) {
+            return Container(
+              width: width ?? 80,
+              height: height ?? 80,
+              color: Colors.grey[300],
+              child: const Icon(Icons.home),
+            );
+          },
+        );
+      } catch (e) {
+        debugPrint('Erro ao decodificar base64: $e');
+      }
+    }
+
+    // Fallback para URL antiga (compatibilidade)
+    if (propriedade.imageUrl.isNotEmpty) {
+      return CachedNetworkImage(
+        imageUrl: propriedade.imageUrl,
+        width: width ?? 80,
+        height: height ?? 80,
+        fit: BoxFit.cover,
+        placeholder: (context, url) => Container(
+          width: width ?? 80,
+          height: height ?? 80,
+          color: Colors.grey[300],
+          child: const Icon(Icons.home),
+        ),
+        errorWidget: (context, url, error) => Container(
+          width: width ?? 80,
+          height: height ?? 80,
+          color: Colors.grey[300],
+          child: const Icon(Icons.home),
+        ),
+      );
+    }
+
+    // Sem imagem
+    return Container(
+      width: width ?? 80,
+      height: height ?? 80,
+      color: Colors.grey[300],
+      child: const Icon(Icons.home),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Painel Admin'),
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+        backgroundColor: Theme.of(context).colorScheme.primary,
+        foregroundColor: Colors.white,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.description),
+            onPressed: () {
+              Navigator.pushNamed(context, '/admin-documentos');
+            },
+            tooltip: 'Gerenciar Documentos',
+          ),
+        ],
       ),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
@@ -152,23 +224,10 @@ class _AdminPanelTelaState extends State<AdminPanelTela> {
                       contentPadding: const EdgeInsets.all(12),
                       leading: ClipRRect(
                         borderRadius: BorderRadius.circular(8),
-                        child: CachedNetworkImage(
-                          imageUrl: propriedade.imageUrl,
+                        child: _buildPropertyImage(
+                          propriedade,
                           width: 80,
                           height: 80,
-                          fit: BoxFit.cover,
-                          placeholder: (context, url) => Container(
-                            width: 80,
-                            height: 80,
-                            color: Colors.grey[300],
-                            child: const Icon(Icons.home),
-                          ),
-                          errorWidget: (context, url, error) => Container(
-                            width: 80,
-                            height: 80,
-                            color: Colors.grey[300],
-                            child: const Icon(Icons.home),
-                          ),
                         ),
                       ),
                       title: Text(

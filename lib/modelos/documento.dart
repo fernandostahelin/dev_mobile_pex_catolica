@@ -1,5 +1,39 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
+enum TipoDocumento {
+  pdf,
+  imagem;
+
+  String get displayName {
+    switch (this) {
+      case TipoDocumento.pdf:
+        return 'PDF';
+      case TipoDocumento.imagem:
+        return 'Imagem';
+    }
+  }
+
+  String get mimeType {
+    switch (this) {
+      case TipoDocumento.pdf:
+        return 'application/pdf';
+      case TipoDocumento.imagem:
+        return 'image/*';
+    }
+  }
+
+  static TipoDocumento fromString(String? value) {
+    switch (value?.toLowerCase()) {
+      case 'imagem':
+      case 'image':
+        return TipoDocumento.imagem;
+      case 'pdf':
+      default:
+        return TipoDocumento.pdf;
+    }
+  }
+}
+
 class Documento {
   final String id;
   final String fileName;
@@ -7,6 +41,7 @@ class Documento {
   final DateTime uploadDate;
   final String clientEmail;
   final int fileSize;
+  final TipoDocumento fileType;
 
   Documento({
     required this.id,
@@ -15,6 +50,8 @@ class Documento {
     required this.uploadDate,
     required this.clientEmail,
     required this.fileSize,
+    this.fileType =
+        TipoDocumento.pdf, // Default to PDF for backwards compatibility
   });
 
   // Converter para Map para Firestore
@@ -25,6 +62,7 @@ class Documento {
       'uploadDate': Timestamp.fromDate(uploadDate),
       'clientEmail': clientEmail,
       'fileSize': fileSize,
+      'fileType': fileType.name,
     };
   }
 
@@ -37,6 +75,7 @@ class Documento {
       uploadDate: (map['uploadDate'] as Timestamp).toDate(),
       clientEmail: map['clientEmail'] ?? '',
       fileSize: map['fileSize'] ?? 0,
+      fileType: TipoDocumento.fromString(map['fileType']),
     );
   }
 

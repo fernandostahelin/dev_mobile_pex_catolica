@@ -17,11 +17,13 @@ class _InformacoesTelasState extends State<InformacoesTela> {
   final _nomeController = TextEditingController();
   final _emailController = TextEditingController();
   final _telefoneController = TextEditingController();
-  
+
   String? _profilePictureBase64;
   bool _isLoading = true;
   bool _isSaving = false;
   final ImagePicker _picker = ImagePicker();
+  bool _interesseNovosImoveis = false;
+  bool _interesseContato = false;
 
   @override
   void initState() {
@@ -39,16 +41,18 @@ class _InformacoesTelasState extends State<InformacoesTela> {
 
   Future<void> _loadUserData() async {
     setState(() => _isLoading = true);
-    
+
     try {
       final userData = await AuthService.getCurrentUserData();
-      
+
       if (userData != null) {
         setState(() {
           _nomeController.text = userData['nome'] ?? '';
           _emailController.text = userData['email'] ?? '';
           _telefoneController.text = userData['telefone'] ?? '';
           _profilePictureBase64 = userData['profilePicture'];
+          _interesseNovosImoveis = userData['interesseNovosImoveis'] ?? false;
+          _interesseContato = userData['interesseContato'] ?? false;
           _isLoading = false;
         });
       } else {
@@ -83,7 +87,10 @@ class _InformacoesTelasState extends State<InformacoesTela> {
               ),
               const SizedBox(height: 20),
               ListTile(
-                leading: const Icon(Icons.camera_alt, color: Colors.purple),
+                leading: Icon(
+                  Icons.camera_alt,
+                  color: Theme.of(context).colorScheme.primary,
+                ),
                 title: const Text('Câmera'),
                 onTap: () {
                   Navigator.pop(context);
@@ -91,7 +98,10 @@ class _InformacoesTelasState extends State<InformacoesTela> {
                 },
               ),
               ListTile(
-                leading: const Icon(Icons.photo_library, color: Colors.purple),
+                leading: Icon(
+                  Icons.photo_library,
+                  color: Theme.of(context).colorScheme.primary,
+                ),
                 title: const Text('Galeria'),
                 onTap: () {
                   Navigator.pop(context);
@@ -127,7 +137,7 @@ class _InformacoesTelasState extends State<InformacoesTela> {
         await _compressAndConvertImage(pickedFile);
       }
     } catch (e) {
-      if (e.toString().contains('permission') || 
+      if (e.toString().contains('permission') ||
           e.toString().contains('denied')) {
         _showErrorSnackBar('Permissão de acesso à câmera/galeria negada.');
       } else {
@@ -173,6 +183,19 @@ class _InformacoesTelasState extends State<InformacoesTela> {
     _showSuccessSnackBar('Foto removida. Clique em Salvar para confirmar.');
   }
 
+  Future<void> _savePreferences() async {
+    try {
+      await AuthService.updateUserProfile(
+        nome: _nomeController.text,
+        interesseNovosImoveis: _interesseNovosImoveis,
+        interesseContato: _interesseContato,
+      );
+    } catch (e) {
+      // Falha silenciosa - não queremos interromper o usuário
+      debugPrint('Erro ao salvar preferências: $e');
+    }
+  }
+
   Future<void> _saveProfile() async {
     if (!_formKey.currentState!.validate()) {
       return;
@@ -183,10 +206,12 @@ class _InformacoesTelasState extends State<InformacoesTela> {
     try {
       final result = await AuthService.updateUserProfile(
         nome: _nomeController.text,
-        telefone: _telefoneController.text.isEmpty 
-            ? null 
+        telefone: _telefoneController.text.isEmpty
+            ? null
             : _telefoneController.text,
         profilePicture: _profilePictureBase64,
+        interesseNovosImoveis: _interesseNovosImoveis,
+        interesseContato: _interesseContato,
       );
 
       setState(() => _isSaving = false);
@@ -231,7 +256,7 @@ class _InformacoesTelasState extends State<InformacoesTela> {
 
   Widget _buildProfilePicture() {
     ImageProvider? imageProvider;
-    
+
     if (_profilePictureBase64 != null) {
       try {
         final bytes = base64Decode(_profilePictureBase64!);
@@ -260,7 +285,7 @@ class _InformacoesTelasState extends State<InformacoesTela> {
               child: Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: Colors.purple,
+                  color: Theme.of(context).colorScheme.primary,
                   shape: BoxShape.circle,
                   border: Border.all(color: Colors.white, width: 2),
                 ),
@@ -282,7 +307,8 @@ class _InformacoesTelasState extends State<InformacoesTela> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Informações Pessoais'),
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+        backgroundColor: Theme.of(context).colorScheme.primary,
+        foregroundColor: Colors.white,
         actions: [
           if (!_isLoading)
             TextButton(
@@ -318,7 +344,7 @@ class _InformacoesTelasState extends State<InformacoesTela> {
                     const SizedBox(height: 20),
                     _buildProfilePicture(),
                     const SizedBox(height: 40),
-                    
+
                     // Email field (read-only)
                     const Text(
                       'Email',
@@ -342,7 +368,7 @@ class _InformacoesTelasState extends State<InformacoesTela> {
                       ),
                     ),
                     const SizedBox(height: 20),
-                    
+
                     // Name field
                     const Text(
                       'Nome *',
@@ -369,7 +395,7 @@ class _InformacoesTelasState extends State<InformacoesTela> {
                       },
                     ),
                     const SizedBox(height: 20),
-                    
+
                     // Phone field
                     const Text(
                       'Telefone',
@@ -390,6 +416,39 @@ class _InformacoesTelasState extends State<InformacoesTela> {
                         prefixIcon: const Icon(Icons.phone),
                       ),
                     ),
+                    const SizedBox(height: 20),
+                    const Divider(),
+                    const SizedBox(height: 10),
+                    const Text(
+                      'Preferências',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    CheckboxListTile(
+                      title: const Text('Tenho interesse em novos imóveis'),
+                      value: _interesseNovosImoveis,
+                      onChanged: (value) {
+                        setState(() {
+                          _interesseNovosImoveis = value ?? false;
+                        });
+                        _savePreferences();
+                      },
+                    ),
+                    CheckboxListTile(
+                      title: const Text(
+                        'Gostaria de ser contatado para futuras oportunidades',
+                      ),
+                      value: _interesseContato,
+                      onChanged: (value) {
+                        setState(() {
+                          _interesseContato = value ?? false;
+                        });
+                        _savePreferences();
+                      },
+                    ),
                     const SizedBox(height: 40),
                   ],
                 ),
@@ -397,6 +456,7 @@ class _InformacoesTelasState extends State<InformacoesTela> {
             ),
       bottomNavigationBar: BottomNavigationBar(
         type: BottomNavigationBarType.fixed,
+        currentIndex: 1,
         items: const [
           BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Início'),
           BottomNavigationBarItem(
@@ -407,11 +467,9 @@ class _InformacoesTelasState extends State<InformacoesTela> {
         onTap: (index) {
           if (index == 0) {
             Navigator.pushNamed(context, '/inicio');
-          } else if (index == 1) {
-            Navigator.pushNamed(context, '/area-cliente-logado');
           }
+          // index == 1 não faz nada, pois já estamos na Área do Cliente
         },
-        currentIndex: 1,
       ),
     );
   }

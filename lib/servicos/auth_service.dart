@@ -11,14 +11,13 @@ class AuthService {
 
   /// Cadastra um novo cliente com Firebase Authentication
   /// Retorna um Map com 'success' (bool) e 'message' (String)
-  static Future<Map<String, dynamic>> cadastrarCliente(Cliente novoCliente) async {
+  static Future<Map<String, dynamic>> cadastrarCliente(
+    Cliente novoCliente,
+  ) async {
     try {
       // Verifica se a senha foi fornecida
       if (novoCliente.senha == null || novoCliente.senha!.isEmpty) {
-        return {
-          'success': false,
-          'message': 'Senha é obrigatória',
-        };
+        return {'success': false, 'message': 'Senha é obrigatória'};
       }
 
       // Cria o usuário no Firebase Authentication
@@ -35,15 +34,14 @@ class AuthService {
         'telefone': novoCliente.telefone,
         'dataCadastro': FieldValue.serverTimestamp(),
         'authProvider': 'email',
+        'interesseNovosImoveis': false,
+        'interesseContato': false,
       });
 
-      return {
-        'success': true,
-        'message': 'Cliente cadastrado com sucesso!',
-      };
+      return {'success': true, 'message': 'Cliente cadastrado com sucesso!'};
     } on FirebaseAuthException catch (e) {
       debugPrint('Erro ao cadastrar: ${e.code}');
-      
+
       // Mapeia códigos de erro específicos para mensagens em português
       String mensagem;
       switch (e.code) {
@@ -54,7 +52,8 @@ class AuthService {
           mensagem = 'Email inválido';
           break;
         case 'operation-not-allowed':
-          mensagem = 'Cadastro com email/senha não está habilitado. Entre em contato com o suporte.';
+          mensagem =
+              'Cadastro com email/senha não está habilitado. Entre em contato com o suporte.';
           break;
         case 'weak-password':
           mensagem = 'A senha é muito fraca';
@@ -62,11 +61,8 @@ class AuthService {
         default:
           mensagem = 'Erro ao cadastrar: ${e.message ?? e.code}';
       }
-      
-      return {
-        'success': false,
-        'message': mensagem,
-      };
+
+      return {'success': false, 'message': mensagem};
     } catch (e) {
       debugPrint('Erro inesperado: $e');
       return {
@@ -166,14 +162,13 @@ class AuthService {
     required String nome,
     String? telefone,
     String? profilePicture,
+    bool? interesseNovosImoveis,
+    bool? interesseContato,
   }) async {
     try {
       User? user = _auth.currentUser;
       if (user == null) {
-        return {
-          'success': false,
-          'message': 'Usuário não autenticado.',
-        };
+        return {'success': false, 'message': 'Usuário não autenticado.'};
       }
 
       // Valida o nome
@@ -195,16 +190,18 @@ class AuthService {
         updateData['profilePicture'] = profilePicture;
       }
 
-      // Atualiza no Firestore
-      await _firestore
-          .collection('users')
-          .doc(user.uid)
-          .update(updateData);
+      // Adiciona preferências se fornecidas
+      if (interesseNovosImoveis != null) {
+        updateData['interesseNovosImoveis'] = interesseNovosImoveis;
+      }
+      if (interesseContato != null) {
+        updateData['interesseContato'] = interesseContato;
+      }
 
-      return {
-        'success': true,
-        'message': 'Perfil atualizado com sucesso!',
-      };
+      // Atualiza no Firestore
+      await _firestore.collection('users').doc(user.uid).update(updateData);
+
+      return {'success': true, 'message': 'Perfil atualizado com sucesso!'};
     } on FirebaseException catch (e) {
       debugPrint('Erro Firebase ao atualizar perfil: ${e.code}');
       if (e.code == 'unavailable') {
@@ -284,6 +281,8 @@ class AuthService {
           'photoUrl': user.photoURL,
           'authProvider': 'google',
           'dataCadastro': FieldValue.serverTimestamp(),
+          'interesseNovosImoveis': false,
+          'interesseContato': false,
         });
       } else {
         // Atualiza informações se necessário
@@ -366,6 +365,29 @@ class AuthService {
     } catch (e) {
       debugPrint('Erro ao buscar WhatsApp: $e');
       return null;
+    }
+  }
+
+  /// Busca todos os usuários cadastrados (apenas para admins)
+  static Future<List<Map<String, dynamic>>> getAllUsers() async {
+    try {
+      QuerySnapshot snapshot = await _firestore
+          .collection('users')
+          .orderBy('nome')
+          .get();
+
+      return snapshot.docs.map((doc) {
+        Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
+        return {
+          'uid': doc.id,
+          'nome': data['nome'] ?? '',
+          'email': data['email'] ?? '',
+          'telefone': data['telefone'],
+        };
+      }).toList();
+    } catch (e) {
+      debugPrint('Erro ao buscar todos os usuários: $e');
+      return [];
     }
   }
 }

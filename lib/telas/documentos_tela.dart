@@ -77,29 +77,33 @@ class _DocumentosTelaState extends State<DocumentosTela> {
 
       if (filePath != null) {
         // Abrir o arquivo com o visualizador padrão usando OpenFilex
-        // Especifica o tipo MIME para filtrar apenas apps que suportam PDF
+        // Especifica o tipo MIME baseado no tipo do documento
         final result = await OpenFilex.open(
           filePath,
-          type: 'application/pdf',
+          type: documento.fileType.mimeType,
         );
 
         // Verifica se houve erro ao abrir
         if (result.type != ResultType.done) {
           if (mounted) {
             _mostrarErro(
-              'Não foi possível abrir o documento: ${result.message}',
+              'Não foi possível abrir o ${documento.fileType.displayName.toLowerCase()}: ${result.message}',
             );
           }
         }
       } else {
         if (mounted) {
-          _mostrarErro('Erro ao baixar o documento');
+          _mostrarErro(
+            'Erro ao baixar o ${documento.fileType.displayName.toLowerCase()}',
+          );
         }
       }
     } catch (e) {
       // Fechar loading se ainda estiver aberto
       if (mounted) Navigator.pop(context);
-      _mostrarErro('Erro ao abrir documento: $e');
+      _mostrarErro(
+        'Erro ao abrir ${documento.fileType.displayName.toLowerCase()}: $e',
+      );
     }
   }
 
@@ -205,12 +209,18 @@ class _DocumentosTelaState extends State<DocumentosTela> {
                                     Container(
                                       padding: const EdgeInsets.all(12),
                                       decoration: BoxDecoration(
-                                        color: Colors.red.shade50,
+                                        color: doc.fileType == TipoDocumento.pdf
+                                            ? Colors.red.shade50
+                                            : Colors.blue.shade50,
                                         borderRadius: BorderRadius.circular(8),
                                       ),
                                       child: Icon(
-                                        Icons.picture_as_pdf,
-                                        color: Colors.red.shade700,
+                                        doc.fileType == TipoDocumento.pdf
+                                            ? Icons.picture_as_pdf
+                                            : Icons.image,
+                                        color: doc.fileType == TipoDocumento.pdf
+                                            ? Colors.red.shade700
+                                            : Colors.blue.shade700,
                                         size: 32,
                                       ),
                                     ),
@@ -259,6 +269,7 @@ class _DocumentosTelaState extends State<DocumentosTela> {
       ),
       bottomNavigationBar: BottomNavigationBar(
         type: BottomNavigationBarType.fixed,
+        currentIndex: 1,
         items: const [
           BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Início'),
           BottomNavigationBarItem(
@@ -269,11 +280,9 @@ class _DocumentosTelaState extends State<DocumentosTela> {
         onTap: (index) {
           if (index == 0) {
             Navigator.pushNamed(context, '/inicio');
-          } else if (index == 1) {
-            Navigator.pushNamed(context, '/area-cliente-logado');
           }
+          // index == 1 não faz nada, pois já estamos na Área do Cliente
         },
-        currentIndex: 1,
       ),
     );
   }
